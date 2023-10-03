@@ -1,0 +1,64 @@
+{
+  "name": "golf-card-game-server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/gold-card-game-server/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/gold-card-game-server",
+        "main": "apps/gold-card-game-server/src/main.ts",
+        "tsConfig": "apps/gold-card-game-server/tsconfig.app.json",
+        "assets": ["apps/gold-card-game-server/src/assets"],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/gold-card-game-server/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "golf-card-game-server:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "golf-card-game-server:build:development"
+        },
+        "production": {
+          "buildTarget": "golf-card-game-server:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/gold-card-game-server/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/gold-card-game-server/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": []
+}
