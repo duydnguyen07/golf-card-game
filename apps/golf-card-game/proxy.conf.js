@@ -15,14 +15,14 @@ function getSocketServerConf(serverUrl) {
  * For more details and options, see https://github.com/angular/angular-cli#proxy-to-backend
  */
 const proxyConfig = [
-// {
-//   context: ['/bintan/epro/ws/websocket'],
+{
+  context: ['/ws'],
 //   pathRewrite: { '^/bintan': '' },
-//   target: getSocketServerConf(serverInfo),
-//   secure: false,
-//   logLevel: 'debug',
-//   ws: true
-// },
+  target: getSocketServerConf(serverInfo),
+  secure: false,
+  logLevel: 'debug',
+  ws: true
+},
 {
   context: ['/'],
 //   pathRewrite: { '^/deal': 'api/deal' },
