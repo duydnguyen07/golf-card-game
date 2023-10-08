@@ -1,4 +1,4 @@
-import { CardSuite } from './card';
+import { Card, CardSuite } from './card';
 
 export type Deck = [
   CardSuite.Two_Spade,
@@ -52,5 +52,7 @@ export type Deck = [
   CardSuite.Jack_Diamond,
   CardSuite.Queen_Diamond,
   CardSuite.King_Diamond,
-  CardSuite.Ace_Diamond
+  CardSuite.Ace_Diamond,
+  Card.Joker1,
+  Card.Joker2,
 ];
