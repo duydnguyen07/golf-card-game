@@ -7,10 +7,14 @@ import express from 'express';
 import * as path from 'path';
 import { deal9Cards } from './card-dealer';
 import expressWs from 'express-ws';
-import { WebSocket } from 'ws';
+import { handleRoomSetup } from './room-manager';
 
 const app = express();
-var expressWsInstance = expressWs(app);
+var expressWsInstance = expressWs(app, null, {
+    wsOptions: {
+      maxPayload: 500000
+    }
+});
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
@@ -19,20 +23,8 @@ app.get('/deal', (req, res) => {
 });
 
 expressWsInstance.app.ws('/ws', function (ws, req) {
-  ws.on('message', function (msg) {
-    console.log(msg);
-
-    expressWsInstance.getWss().clients.forEach(function each(client) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(msg);
-      }
-    });
-  });
+  handleRoomSetup(ws)
 });
-
-expressWsInstance.getWss().on('connection',(e) => {
-  console.log(e)
-})
 
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
