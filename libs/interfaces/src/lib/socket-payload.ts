@@ -13,5 +13,6 @@ export interface SocketJoinPayload extends SocketPayload {
 export enum SocketAction {
   Join = 'join',
   Leave = 'leave',
-  PassThrough = 'pass_through'
+  PassThrough = 'pass_through',
+  JoinedSuccess = 'joined_success'
 }

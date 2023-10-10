@@ -9,7 +9,8 @@ import {
   SocketPayload,
 } from '@golf-card-game/interfaces';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { webSocket } from 'rxjs/webSocket';
+import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
+import { UserService } from './user.service';
 
 @Component({
   standalone: true,
@@ -20,31 +21,49 @@ import { webSocket } from 'rxjs/webSocket';
 })
 export class AppComponent {
   title = 'golf-card-game';
-  
-  constructor(private httpClient: HttpClient) {
+  ROOM_NAME = '123'; //TODO: make this room name unique
+  constructor(
+    private httpClient: HttpClient,
+    private userService: UserService
+  ) {
     this.httpClient.get('/deal').subscribe(console.log);
 
-    const subject = webSocket<SocketPayload>('ws://localhost:3333/ws'); //TODO: handle this, we cannot let it be any value
+    this.initSocketConnection(this.userService.websocketSubject);
+  }
 
+  private initSocketConnection(subject: WebSocketSubject<SocketPayload>) {
     subject.subscribe({
-      next: (message) => console.log(message),
+      next: (message) => {
+        if (message.action === SocketAction.JoinedSuccess) {
+          this.userService.setUserId(message.playerId);
+        }
+        console.log(message);
+      },
       error: (err) => console.error(err),
       complete: () => console.log('completed!'),
     });
+
+    this.joinRoom(subject);
+
+
+    // TODO: draw diagram to show workflow of the actual game. Idea so far: keep the game board distributed, that means that the frontend has a complete game board and knows the logic of what state it is in. What the next steps are and who's turn it is
+    
+    // subject.next({
+    //   passThroughMessage: 'wasssssupppp' + Math.random(),
+    //   action: SocketAction.Join,
+    //   room: this.ROOM_NAME,
+    //   playerId: 'string',
+    // });
+  }
+
+  private joinRoom(subject: WebSocketSubject<SocketPayload>) {
     const socketPayload: SocketJoinPayload = {
       playerName: Math.random() + '',
       playerId: '',
       passThroughMessage: null,
       action: SocketAction.Join,
-      room: '123',
+      room: this.ROOM_NAME,
     };
     subject.next(socketPayload);
-
-    subject.next({
-      passThroughMessage: 'wasssssupppp' + Math.random(),
-      action: SocketAction.Join,
-      room: '123',
-      playerId: 'string'
-    });
   }
 }

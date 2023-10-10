@@ -71,6 +71,15 @@ function handleJoinAction(
       socket,
     }; // join the room
 
+    // Notify user of successful room
+    const joinedSuccessfulPayload: SocketPayload = {
+      passThroughMessage: null,
+      action: SocketAction.JoinedSuccess,
+      room: room,
+      playerId: uuid,
+    };
+    socket.send(JSON.stringify(joinedSuccessfulPayload));
+
     sendMessageToPeopleInRoom(
       rooms,
       room,
