@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
   Card,
   CardSuite,
   Deck,
+  NewPlayerJoinedSuccessPayload,
   SocketAction,
   SocketJoinPayload,
   SocketPayload,
@@ -11,24 +12,32 @@ import {
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
 import { UserService } from './user.service';
+import { firstValueFrom } from 'rxjs';
+import { RoomService } from './room.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   standalone: true,
-  imports: [RouterModule, HttpClientModule],
+  imports: [RouterModule, HttpClientModule, CommonModule],
   selector: 'golf-card-game-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   title = 'golf-card-game';
   ROOM_NAME = '123'; //TODO: make this room name unique
+
   constructor(
     private httpClient: HttpClient,
-    private userService: UserService
+    private userService: UserService,
+    public roomService: RoomService
   ) {
-    this.httpClient.get('/deal').subscribe(console.log);
-
     this.initSocketConnection(this.userService.websocketSubject);
+  }
+
+  deal() {
+    firstValueFrom(this.httpClient.get('/deal'));
   }
 
   private initSocketConnection(subject: WebSocketSubject<SocketPayload>) {
@@ -36,6 +45,13 @@ export class AppComponent {
       next: (message) => {
         if (message.action === SocketAction.JoinedSuccess) {
           this.userService.setUserId(message.playerId);
+        } else if (message.action === SocketAction.NewPlayerJoinedSuccess) {
+          this.roomService.addPlayer(
+            (message as NewPlayerJoinedSuccessPayload).playerName,
+            message.playerId
+          );
+        } else if (message.action === SocketAction.ExistingPlayerLeft) {
+          this.roomService.removePlayer(message.playerId);
         }
         console.log(message);
       },
@@ -44,16 +60,6 @@ export class AppComponent {
     });
 
     this.joinRoom(subject);
-
-
-    // TODO: draw diagram to show workflow of the actual game. Idea so far: keep the game board distributed, that means that the frontend has a complete game board and knows the logic of what state it is in. What the next steps are and who's turn it is
-    
-    // subject.next({
-    //   passThroughMessage: 'wasssssupppp' + Math.random(),
-    //   action: SocketAction.Join,
-    //   room: this.ROOM_NAME,
-    //   playerId: 'string',
-    // });
   }
 
   private joinRoom(subject: WebSocketSubject<SocketPayload>) {

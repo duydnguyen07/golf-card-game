@@ -1,4 +1,6 @@
 import {
+  ExistingPlayerLeftPayload,
+  NewPlayerJoinedSuccessPayload,
   PlayerProfile,
   Rooms,
   SocketAction,
@@ -8,19 +10,34 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocket } from 'ws';
 
-const rooms: Rooms = {};
+const ROOM_DATABASE: Rooms = {};
 
 function handleRoomSetup(socket: WebSocket) {
   const uuid = uuidv4();
 
   const leave = (room: string) => {
     // not present: do nothing
-    if (!rooms[room][uuid]) return;
+    if (!ROOM_DATABASE[room].players[uuid]) return;
 
     // if the one exiting is the last one, destroy the room
-    if (Object.keys(rooms[room]).length === 1) delete rooms[room];
+    if (Object.keys(ROOM_DATABASE[room].players).length === 1)
+      delete ROOM_DATABASE[room];
     // otherwise simply leave the room
-    else delete rooms[room][uuid];
+    else {
+      delete ROOM_DATABASE[room].players[uuid];
+      const userLeftPayload: ExistingPlayerLeftPayload = {
+        passThroughMessage: null,
+        action: SocketAction.ExistingPlayerLeft,
+        room: room,
+        playerId: uuid,
+      };
+      sendMessageToPeopleInRoom(
+        ROOM_DATABASE,
+        room,
+        uuid,
+        JSON.stringify(userLeftPayload)
+      );
+    }
   };
 
   socket.on('message', (data: string) => {
@@ -34,12 +51,19 @@ function handleRoomSetup(socket: WebSocket) {
 
       if (action === SocketAction.Join) {
         const playerName = (parsedData as SocketJoinPayload).playerName;
-        handleJoinAction(rooms, room, uuid, socket, playerName);
+        handleJoinAction(ROOM_DATABASE, room, uuid, socket, playerName);
+
+        console.log('rooms', ROOM_DATABASE);
       } else if (action === SocketAction.Leave) {
         leave(room);
       } else if (action === SocketAction.PassThrough) {
-        if (rooms[room]) {
-          sendMessageToPeopleInRoom(rooms, room, playerId, passThroughMessage);
+        if (ROOM_DATABASE[room]) {
+          sendMessageToPeopleInRoom(
+            ROOM_DATABASE,
+            room,
+            playerId,
+            passThroughMessage
+          );
         } else {
           console.warn('Warning: Unknown room for the following data', data);
         }
@@ -51,7 +75,7 @@ function handleRoomSetup(socket: WebSocket) {
 
   socket.on('close', () => {
     // for each room, remove the closed socket
-    Object.keys(rooms).forEach((room) => leave(room));
+    Object.keys(ROOM_DATABASE).forEach((room) => leave(room));
   });
 }
 
@@ -63,30 +87,73 @@ function handleJoinAction(
   playerName: string
 ) {
   if (!rooms[room]) {
-    rooms[room] = {}; // create the room
+    rooms[room] = {
+      players: {},
+      gameAuditTrail: [],
+    }; // create the room
   }
-  if (!rooms[room][uuid]) {
-    rooms[room][uuid] = {
+  if (!rooms[room].players[uuid]) {
+    rooms[room].players[uuid] = {
       playerName,
       socket,
+      cards: [],
     }; // join the room
 
-    // Notify user of successful room
-    const joinedSuccessfulPayload: SocketPayload = {
-      passThroughMessage: null,
-      action: SocketAction.JoinedSuccess,
-      room: room,
-      playerId: uuid,
-    };
-    socket.send(JSON.stringify(joinedSuccessfulPayload));
-
-    sendMessageToPeopleInRoom(
-      rooms,
-      room,
-      uuid,
-      JSON.stringify({ playerName })
-    );
+    notifyUserAboutRoomJoinSuccess(rooms, room, uuid, socket);
+    notifyExistingPlayersAboutNewPlayer(rooms, room, uuid, playerName);
   }
+}
+
+function notifyExistingPlayersAboutNewPlayer(
+  rooms: Rooms,
+  room: string,
+  uuid: string,
+  playerName: string
+) {
+  const newPlayerJoinedSuccessPayload: NewPlayerJoinedSuccessPayload = {
+    passThroughMessage: null,
+    action: SocketAction.NewPlayerJoinedSuccess,
+    room: room,
+    playerId: uuid,
+    playerName: playerName,
+  };
+  sendMessageToPeopleInRoom(
+    rooms,
+    room,
+    uuid,
+    JSON.stringify(newPlayerJoinedSuccessPayload)
+  );
+}
+
+function notifyUserAboutRoomJoinSuccess(
+  rooms: Rooms,
+  room: string,
+  uuid: string,
+  socket: WebSocket
+) {
+  // Notify current user of successful room
+  const joinedSuccessfulPayload: SocketPayload = {
+    passThroughMessage: null,
+    action: SocketAction.JoinedSuccess,
+    room: room,
+    playerId: uuid,
+  };
+  socket.send(JSON.stringify(joinedSuccessfulPayload));
+
+  // Notify current user about existing players
+  Object.keys(rooms[room].players).forEach((existingPlayerId: string) => {
+    const existingPlayer = rooms[room].players[existingPlayerId];
+    if (existingPlayerId !== uuid) {
+      const existingPlayerPayload: NewPlayerJoinedSuccessPayload = {
+        passThroughMessage: null,
+        action: SocketAction.NewPlayerJoinedSuccess,
+        room: room,
+        playerId: existingPlayerId,
+        playerName: existingPlayer.playerName,
+      };
+      socket.send(JSON.stringify(existingPlayerPayload));
+    }
+  });
 }
 
 function sendMessageToPeopleInRoom(
@@ -95,7 +162,7 @@ function sendMessageToPeopleInRoom(
   sourceUuid: string,
   passThroughMessage: string
 ) {
-  Object.entries(rooms[room]).forEach(
+  Object.entries(rooms[room].players).forEach(
     ([uuid, playerProfile]: [string, PlayerProfile]) => {
       // Prevent sending to self
       if (uuid !== sourceUuid) {

@@ -1,1 +1,7 @@
 <router-outlet></router-outlet>
+<div>
+    <label>Current players in room</label>
+    <div *ngFor="let player of roomService.otherPlayers()">{{player.name}}</div>
+</div>
+
+<button (click)="deal()">Deal</button>
