@@ -1,0 +1,16 @@
+<div *ngIf="currentPlayer">
+  <h3>My Hand</h3>
+  {{ currentPlayer.playerName }}
+
+  <div class="card-columns">
+    <golf-card-game-card-column
+      [column]="currentPlayer.cardGrid.col1"
+    ></golf-card-game-card-column>
+    <golf-card-game-card-column
+      [column]="currentPlayer.cardGrid.col2"
+    ></golf-card-game-card-column>
+    <golf-card-game-card-column
+      [column]="currentPlayer.cardGrid.col3"
+    ></golf-card-game-card-column>
+  </div>
+</div>

@@ -1,6 +1,8 @@
-import { Injectable, Signal, computed, signal } from '@angular/core';
-import { GameBoard, SocketPayload } from '@golf-card-game/interfaces';
-import { CardGridView } from 'libs/interfaces/src/lib/card-grid';
+import { Injectable, signal } from '@angular/core';
+import {
+  CardGridView,
+  GameBoard,
+} from '@golf-card-game/interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +11,8 @@ export class GameBoardService {
   private GAMEBOARD: GameBoard = {
     players: {},
   };
-  gameBoard = signal<GameBoard>(this.GAMEBOARD);
+  private _gameBoard = signal<GameBoard>(this.GAMEBOARD);
+  gameBoard = this._gameBoard.asReadonly();
 
   constructor() {}
 
@@ -20,12 +23,14 @@ export class GameBoardService {
       cardGrid: CardGridView;
     }
   ) {
-    this.gameBoard.mutate((value: GameBoard) => {
+    this._gameBoard.mutate((value: GameBoard) => {
       value.players[playerId] = hand;
     });
+
+    console.log(this._gameBoard())
   }
 
   reset() {
-    this.gameBoard.set(this.GAMEBOARD);
+    this._gameBoard.set(this.GAMEBOARD);
   }
 }

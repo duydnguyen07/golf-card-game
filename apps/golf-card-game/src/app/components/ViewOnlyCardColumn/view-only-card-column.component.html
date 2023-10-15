@@ -1,0 +1,13 @@
+<div class="card-column">
+    <div *ngFor="let item of column; let index = index">
+      <ng-container *ngIf="item.isRevealed">
+        {{ item.name }}
+      </ng-container>
+      <ng-container *ngIf="!item.isRevealed">
+        <div>
+            HIDDEN
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  

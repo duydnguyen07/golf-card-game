@@ -29,3 +29,11 @@ export interface CardGridView {
         name: Partial<Deck> | null
     }[],
 }
+
+export function generateCardGrid(): CardGrid {
+    return {
+        col1: [],
+        col2: [],
+        col3: [],
+      }
+}

@@ -1,7 +1,23 @@
 <router-outlet></router-outlet>
 <div>
-    <label>Current players in room</label>
-    <div *ngFor="let player of roomService.otherPlayers()">{{player.name}}</div>
+  <label>Current players in room</label>
+  <div *ngFor="let player of roomService.otherPlayers()">{{ player.name }}</div>
 </div>
 
 <button (click)="deal()">Deal</button>
+
+<div>
+    <golf-card-game-others-game-board
+        [players]="otherPlayerBoards()"
+    ></golf-card-game-others-game-board>
+  <!-- <div *ngFor="let player of otherPlayerBoards()">
+    {{ player.playerName }}
+  </div> -->
+</div>
+
+
+<div class="game-board">
+  <golf-card-game-my-game-board
+    [currentPlayer]="currentPlayerGameBoard()"
+  ></golf-card-game-my-game-board>
+</div>

@@ -2,10 +2,12 @@ import {
   ExistingPlayerLeftPayload,
   NewPlayerJoinedSuccessPayload,
   PlayerProfile,
+  RoomStatus,
   Rooms,
   SocketAction,
   SocketJoinPayload,
   SocketPayload,
+  generateCardGrid,
 } from '@golf-card-game/interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocket } from 'ws';
@@ -90,13 +92,15 @@ function handleJoinAction(
     rooms[room] = {
       players: {},
       gameAuditTrail: [],
+      leftOverCards: [],
+      status: RoomStatus.Waiting
     }; // create the room
   }
   if (!rooms[room].players[uuid]) {
     rooms[room].players[uuid] = {
       playerName,
       socket,
-      cards: [],
+      cards: generateCardGrid() ,
     }; // join the room
 
     notifyUserAboutRoomJoinSuccess(rooms, room, uuid, socket);
@@ -172,4 +176,4 @@ function sendMessageToPeopleInRoom(
   );
 }
 
-export { handleRoomSetup };
+export { handleRoomSetup, ROOM_DATABASE };

@@ -5,9 +5,9 @@
 
 import express from 'express';
 import * as path from 'path';
-import { deal9Cards } from './card-dealer';
 import expressWs from 'express-ws';
-import { handleRoomSetup } from './room-manager';
+import { handleRoomSetup, ROOM_DATABASE } from './room-manager';
+import { handleGameRuntime } from './game-referee';
 
 const app = express();
 var expressWsInstance = expressWs(app, null, {
@@ -18,12 +18,9 @@ var expressWsInstance = expressWs(app, null, {
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-app.get('/deal', (req, res) => {
-  res.status(200).json(deal9Cards(3, 4));
-});
-
 expressWsInstance.app.ws('/ws', function (ws, req) {
   handleRoomSetup(ws)
+  handleGameRuntime(ws, ROOM_DATABASE)
 });
 
 const port = process.env.PORT || 3333;

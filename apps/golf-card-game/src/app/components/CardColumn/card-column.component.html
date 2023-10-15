@@ -1,0 +1,20 @@
+<div class="card-column">
+  <div *ngFor="let item of column; let index = index">
+    <ng-container *ngIf="item.isRevealed">
+      {{ item.name }}
+    </ng-container>
+    <ng-container *ngIf="!item.isRevealed">
+      <div [title]="item.name || ''">
+        <button
+          (click)="
+            cardClicked.emit({
+              cardPositionIndex: index
+            })
+          "
+        >
+          Reveal Card
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>

@@ -8,3 +8,6 @@ export type GameBoard = {
         }
     }
 }
+
+
+export const COLUMN_COUNT = 3;

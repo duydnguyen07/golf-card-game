@@ -1,0 +1,18 @@
+<ng-container *ngIf="players">
+  <div class="other-players-board">
+    <div *ngFor="let player of players">
+      <h3>Player: {{ player.playerName }}</h3>
+      <div class="card-columns">
+        <golf-card-game-view-only-card-column
+          [column]="player.cardGrid.col1"
+        ></golf-card-game-view-only-card-column>
+        <golf-card-game-view-only-card-column
+          [column]="player.cardGrid.col2"
+        ></golf-card-game-view-only-card-column>
+        <golf-card-game-view-only-card-column
+          [column]="player.cardGrid.col3"
+        ></golf-card-game-view-only-card-column>
+      </div>
+    </div>
+  </div>
+</ng-container>

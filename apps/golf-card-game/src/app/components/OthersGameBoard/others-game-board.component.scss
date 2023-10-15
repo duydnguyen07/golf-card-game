@@ -1,0 +1,13 @@
+.card-columns {
+    display: flex;
+    width: 50vw;
+    height: 10rem;
+    justify-content: space-around;
+    align-content: space-evenly;
+    border: 1px solid red;
+}
+  
+.other-players-board {
+    display: flex;
+    justify-content: space-around;
+}

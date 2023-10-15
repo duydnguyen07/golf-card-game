@@ -1,7 +1,4 @@
 import { Injectable, Signal, computed, signal } from '@angular/core';
-import { SocketPayload } from '@golf-card-game/interfaces';
-import { BehaviorSubject, map } from 'rxjs';
-import { webSocket } from 'rxjs/webSocket';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +17,6 @@ export class RoomService {
       ...currentPlayers,
       { name, id },
     ]);
-
-    console.log(this._otherPlayers())
   }
 
   removePlayer(idToRemove: string) {

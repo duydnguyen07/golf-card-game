@@ -1,0 +1,5 @@
+@use '../CardColumn/card-column.component.scss' as common;
+
+.card-column {
+    @include common.card-column;
+}

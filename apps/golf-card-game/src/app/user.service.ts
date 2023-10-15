@@ -7,15 +7,15 @@ import { webSocket } from 'rxjs/webSocket';
   providedIn: 'root'
 })
 export class UserService {
-  private _userId = new BehaviorSubject('');
+  private _userId = signal<string>('');
 
-  readonly userId$ = this._userId.asObservable();
-  readonly isJoiningRoom$ = this.userId$.pipe(map((userId) => !userId))
+  readonly userId = this._userId.asReadonly();
+  readonly isJoiningRoom$ = computed(() => !this._userId());
   readonly websocketSubject = webSocket<SocketPayload>('ws://localhost:3333/ws'); //TODO: handle this, we cannot let it be any value
 
   constructor() { }
 
   setUserId(userId: string ) {
-    this._userId.next(userId);
+    this._userId.set(userId);
   }
 }

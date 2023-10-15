@@ -1,24 +1,36 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  computed,
+  Signal,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
-  Card,
-  CardSuite,
-  Deck,
+  CardGridView,
   NewPlayerJoinedSuccessPayload,
+  SetPlayerHandPayload,
   SocketAction,
   SocketJoinPayload,
   SocketPayload,
 } from '@golf-card-game/interfaces';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
+import { HttpClientModule } from '@angular/common/http';
+import { WebSocketSubject } from 'rxjs/webSocket';
 import { UserService } from './user.service';
-import { firstValueFrom } from 'rxjs';
 import { RoomService } from './room.service';
 import { CommonModule } from '@angular/common';
+import { GameBoardService } from './game-board.service';
+import { MyGameBoardComponent } from './components/MyGameBoard/my-game-board.component';
+import { OthersGameBoardComponent } from './components/OthersGameBoard/others-game-board.component';
 
 @Component({
   standalone: true,
-  imports: [RouterModule, HttpClientModule, CommonModule],
+  imports: [
+    OthersGameBoardComponent,
+    RouterModule,
+    HttpClientModule,
+    CommonModule,
+    MyGameBoardComponent,
+  ],
   selector: 'golf-card-game-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
@@ -27,17 +39,47 @@ import { CommonModule } from '@angular/common';
 export class AppComponent {
   title = 'golf-card-game';
   ROOM_NAME = '123'; //TODO: make this room name unique
-
+  currentPlayerGameBoard: Signal<{
+    playerName: string;
+    cardGrid: CardGridView;
+  } | null> = computed(() => {
+    const gameBoard = this.gameBoardService.gameBoard();
+    return gameBoard.players[this.userService.userId()];
+  });
+  otherPlayerBoards: Signal<
+    {
+      playerId: string;
+      playerName: string;
+      cardGrid: CardGridView;
+    }[]
+  > = computed(() => {
+    const gameBoard = this.gameBoardService.gameBoard();
+    return Object.entries(gameBoard.players)
+      .filter(([playerId]) => playerId !== this.userService.userId())
+      .map(([playerId, playerProfile]) => {
+        return {
+          playerId,
+          playerName: playerProfile.playerName,
+          cardGrid: playerProfile.cardGrid,
+        };
+      });
+  });
   constructor(
-    private httpClient: HttpClient,
-    private userService: UserService,
+    public userService: UserService,
+    public gameBoardService: GameBoardService,
     public roomService: RoomService
   ) {
     this.initSocketConnection(this.userService.websocketSubject);
   }
 
   deal() {
-    firstValueFrom(this.httpClient.get('/deal'));
+    this.gameBoardService.reset();
+    this.userService.websocketSubject.next({
+      passThroughMessage: null,
+      action: SocketAction.StartGame,
+      room: this.ROOM_NAME,
+      playerId: this.userService.userId(),
+    });
   }
 
   private initSocketConnection(subject: WebSocketSubject<SocketPayload>) {
@@ -52,8 +94,12 @@ export class AppComponent {
           );
         } else if (message.action === SocketAction.ExistingPlayerLeft) {
           this.roomService.removePlayer(message.playerId);
+        } else if (message.action === SocketAction.SetPlayerHand) {
+          this.gameBoardService.setPlayerHand(message.playerId, {
+            playerName: (message as SetPlayerHandPayload).playerName,
+            cardGrid: (message as SetPlayerHandPayload).cardGrid,
+          });
         }
-        console.log(message);
       },
       error: (err) => console.error(err),
       complete: () => console.log('completed!'),
