@@ -2,41 +2,51 @@ import { CardGridView } from "./card-grid";
 
 export interface SocketPayload {
   passThroughMessage: string | null;
-  action: SocketAction;
+  action: ClientSocketAction | ServerSocketAction;
   room: string;
   playerId: string;
 }
 
 export interface SocketJoinPayload extends SocketPayload {
   playerName: string;
-  action: SocketAction.Join;
+  action: ClientSocketAction.Join;
 }
 
 export interface NewPlayerJoinedSuccessPayload extends SocketPayload {
   playerName: string;
-  action: SocketAction.NewPlayerJoinedSuccess;
+  action: ServerSocketAction.NewPlayerJoinedSuccess;
 }
 
 export interface ExistingPlayerLeftPayload extends SocketPayload {
-  action: SocketAction.ExistingPlayerLeft;
+  action: ServerSocketAction.ExistingPlayerLeft;
 }
 
 export interface SetPlayerHandPayload extends SocketPayload {
-  action: SocketAction.SetPlayerHand;
+  action: ServerSocketAction.SetPlayerHand;
   playerName: string;
   cardGrid: CardGridView
 }
 
-export interface JoinedSuccessPayload extends SocketPayload {}
+export interface SetPlayerTurn extends SocketPayload {
+  action: ServerSocketAction.SetPlayerTurn;
+}
 
+export interface SetDrawnCard extends SocketPayload {
+  action: ServerSocketAction.SetDrawnCard;
+}
 
-export enum SocketAction {
+export enum ClientSocketAction {
   Join = 'join',
   Leave = 'leave',
   PassThrough = 'pass_through',
+  StartGame = 'start_game',
+}
+
+export enum ServerSocketAction {
+  SetPlayerHand = 'set_player_hand',
+  SetPlayerTurn = 'set_player_turn',
+  SetDrawnCard = 'set_drawn_card',
   JoinedSuccess = 'joined_success',
   NewPlayerJoinedSuccess = 'new_player_joined_success',
   ExistingPlayerLeft = 'existing_player_left',
-  StartGame = 'start_game',
-  SetPlayerHand = 'set_player_hand',
 }

@@ -1,16 +1,17 @@
 import {
   ExistingPlayerLeftPayload,
   NewPlayerJoinedSuccessPayload,
-  PlayerProfile,
   RoomStatus,
   Rooms,
-  SocketAction,
+  ClientSocketAction,
   SocketJoinPayload,
   SocketPayload,
   generateCardGrid,
+  ServerSocketAction,
 } from '@golf-card-game/interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocket } from 'ws';
+import { sendMessageToOtherPlayersInRoom } from './socket-util';
 
 const ROOM_DATABASE: Rooms = {};
 
@@ -29,11 +30,11 @@ function handleRoomSetup(socket: WebSocket) {
       delete ROOM_DATABASE[room].players[uuid];
       const userLeftPayload: ExistingPlayerLeftPayload = {
         passThroughMessage: null,
-        action: SocketAction.ExistingPlayerLeft,
+        action: ServerSocketAction.ExistingPlayerLeft,
         room: room,
         playerId: uuid,
       };
-      sendMessageToPeopleInRoom(
+      sendMessageToOtherPlayersInRoom(
         ROOM_DATABASE,
         room,
         uuid,
@@ -51,16 +52,16 @@ function handleRoomSetup(socket: WebSocket) {
         room = parsedData.room,
         playerId = parsedData.playerId;
 
-      if (action === SocketAction.Join) {
+      if (action === ClientSocketAction.Join) {
         const playerName = (parsedData as SocketJoinPayload).playerName;
         handleJoinAction(ROOM_DATABASE, room, uuid, socket, playerName);
 
         console.log('rooms', ROOM_DATABASE);
-      } else if (action === SocketAction.Leave) {
+      } else if (action === ClientSocketAction.Leave) {
         leave(room);
-      } else if (action === SocketAction.PassThrough) {
+      } else if (action === ClientSocketAction.PassThrough) {
         if (ROOM_DATABASE[room]) {
-          sendMessageToPeopleInRoom(
+          sendMessageToOtherPlayersInRoom(
             ROOM_DATABASE,
             room,
             playerId,
@@ -93,7 +94,10 @@ function handleJoinAction(
       players: {},
       gameAuditTrail: [],
       leftOverCards: [],
-      status: RoomStatus.Waiting
+      status: RoomStatus.Waiting,
+      drawnCard: null,
+      currentTurnPlayerId: '',
+      lastPlayerTurnId: ''
     }; // create the room
   }
   if (!rooms[room].players[uuid]) {
@@ -116,12 +120,12 @@ function notifyExistingPlayersAboutNewPlayer(
 ) {
   const newPlayerJoinedSuccessPayload: NewPlayerJoinedSuccessPayload = {
     passThroughMessage: null,
-    action: SocketAction.NewPlayerJoinedSuccess,
+    action: ServerSocketAction.NewPlayerJoinedSuccess,
     room: room,
     playerId: uuid,
     playerName: playerName,
   };
-  sendMessageToPeopleInRoom(
+  sendMessageToOtherPlayersInRoom(
     rooms,
     room,
     uuid,
@@ -138,7 +142,7 @@ function notifyUserAboutRoomJoinSuccess(
   // Notify current user of successful room
   const joinedSuccessfulPayload: SocketPayload = {
     passThroughMessage: null,
-    action: SocketAction.JoinedSuccess,
+    action: ServerSocketAction.JoinedSuccess,
     room: room,
     playerId: uuid,
   };
@@ -150,7 +154,7 @@ function notifyUserAboutRoomJoinSuccess(
     if (existingPlayerId !== uuid) {
       const existingPlayerPayload: NewPlayerJoinedSuccessPayload = {
         passThroughMessage: null,
-        action: SocketAction.NewPlayerJoinedSuccess,
+        action: ServerSocketAction.NewPlayerJoinedSuccess,
         room: room,
         playerId: existingPlayerId,
         playerName: existingPlayer.playerName,
@@ -160,20 +164,6 @@ function notifyUserAboutRoomJoinSuccess(
   });
 }
 
-function sendMessageToPeopleInRoom(
-  rooms: Rooms,
-  room: string,
-  sourceUuid: string,
-  passThroughMessage: string
-) {
-  Object.entries(rooms[room].players).forEach(
-    ([uuid, playerProfile]: [string, PlayerProfile]) => {
-      // Prevent sending to self
-      if (uuid !== sourceUuid) {
-        playerProfile.socket.send(passThroughMessage);
-      }
-    }
-  );
-}
+
 
 export { handleRoomSetup, ROOM_DATABASE };

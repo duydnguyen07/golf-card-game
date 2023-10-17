@@ -9,7 +9,10 @@ export type Rooms = {
       [socketUuid in string]: PlayerProfile;
     };
     leftOverCards: Partial<Deck>[];
-    status: RoomStatus
+    drawnCard: Partial<Deck> | null;
+    status: RoomStatus;
+    currentTurnPlayerId: string;
+    lastPlayerTurnId: string;
   };
 };
 

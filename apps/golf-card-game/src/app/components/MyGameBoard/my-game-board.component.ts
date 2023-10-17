@@ -32,5 +32,6 @@ export class MyGameBoardComponent {
 
   ngOnChanges() {
     console.log('MyGameBoardComponent', this.currentPlayer)
+    //TODO: implement reveal card action 
   }
 }

@@ -9,9 +9,10 @@ import {
   CardGridView,
   NewPlayerJoinedSuccessPayload,
   SetPlayerHandPayload,
-  SocketAction,
+  ClientSocketAction,
   SocketJoinPayload,
   SocketPayload,
+  ServerSocketAction,
 } from '@golf-card-game/interfaces';
 import { HttpClientModule } from '@angular/common/http';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -76,7 +77,7 @@ export class AppComponent {
     this.gameBoardService.reset();
     this.userService.websocketSubject.next({
       passThroughMessage: null,
-      action: SocketAction.StartGame,
+      action: ClientSocketAction.StartGame,
       room: this.ROOM_NAME,
       playerId: this.userService.userId(),
     });
@@ -85,16 +86,16 @@ export class AppComponent {
   private initSocketConnection(subject: WebSocketSubject<SocketPayload>) {
     subject.subscribe({
       next: (message) => {
-        if (message.action === SocketAction.JoinedSuccess) {
+        if (message.action === ServerSocketAction.JoinedSuccess) {
           this.userService.setUserId(message.playerId);
-        } else if (message.action === SocketAction.NewPlayerJoinedSuccess) {
+        } else if (message.action === ServerSocketAction.NewPlayerJoinedSuccess) {
           this.roomService.addPlayer(
             (message as NewPlayerJoinedSuccessPayload).playerName,
             message.playerId
           );
-        } else if (message.action === SocketAction.ExistingPlayerLeft) {
+        } else if (message.action === ServerSocketAction.ExistingPlayerLeft) {
           this.roomService.removePlayer(message.playerId);
-        } else if (message.action === SocketAction.SetPlayerHand) {
+        } else if (message.action === ServerSocketAction.SetPlayerHand) {
           this.gameBoardService.setPlayerHand(message.playerId, {
             playerName: (message as SetPlayerHandPayload).playerName,
             cardGrid: (message as SetPlayerHandPayload).cardGrid,
@@ -113,7 +114,7 @@ export class AppComponent {
       playerName: Math.random() + '',
       playerId: '',
       passThroughMessage: null,
-      action: SocketAction.Join,
+      action: ClientSocketAction.Join,
       room: this.ROOM_NAME,
     };
     subject.next(socketPayload);

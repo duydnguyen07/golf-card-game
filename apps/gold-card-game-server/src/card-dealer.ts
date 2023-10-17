@@ -7,7 +7,8 @@ import {
   PlayerProfile,
   Rooms,
   SetPlayerHandPayload,
-  SocketAction,
+  ClientSocketAction,
+  ServerSocketAction,
 } from '@golf-card-game/interfaces';
 import { WebSocket } from 'ws';
 
@@ -154,20 +155,7 @@ function dealCardToEachPlayer(inputs: {
   return result;
 }
 
-function dealCardAndNotifyAllPlayers(roomDatabase: Rooms, room: string) {
-  const playersInRoom = Object.entries(roomDatabase[room].players);
-
-  const dealtCardsAndDeck: {
-    dealtCardsPerPlayer: {
-      [key in number]: CardGrid;
-    };
-    leftOver: Partial<Deck>[];
-  } = deal9Cards(3, playersInRoom.length);
-
-  playersInRoom.forEach(([_, playerProfile], index) => {
-    playerProfile.cards = dealtCardsAndDeck.dealtCardsPerPlayer[index];
-  });
-
+function notifyAllPlayersAboutDealtCards(playersInRoom: [string, PlayerProfile][], room: string) {
   playersInRoom.forEach(([currentPlayerId, currentPlayerProfile]) => {
     notifyCurrentPlayerAboutTheirCard(
       currentPlayerProfile.socket,
@@ -191,7 +179,7 @@ function notifyCurrentPlayerAboutTheirCard(
   currentPlayerId: string
 ) {
   const payload: SetPlayerHandPayload = {
-    action: SocketAction.SetPlayerHand,
+    action: ServerSocketAction.SetPlayerHand,
     playerName: currentPlayerProfile.playerName,
     cardGrid: currentPlayerProfile.cards,
     room,
@@ -221,7 +209,7 @@ function notifyCurrentPlayerAboutOtherPlayersCard(
   playersInRoom.forEach(([otherPlayerId, playerProfile]) => {
     if (otherPlayerId !== currentPlayerId) {
       const payload: SetPlayerHandPayload = {
-        action: SocketAction.SetPlayerHand,
+        action: ServerSocketAction.SetPlayerHand,
         playerName: playerProfile.playerName,
         cardGrid: playerProfile.cards,
         room,
@@ -252,4 +240,4 @@ function convertToMaskedColumn(
   }));
 }
 
-export { dealCardAndNotifyAllPlayers };
+export { deal9Cards, notifyAllPlayersAboutDealtCards };
