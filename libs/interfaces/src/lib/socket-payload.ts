@@ -1,4 +1,5 @@
 import { CardGridView } from "./card-grid";
+import { Deck } from "./deck";
 
 export interface SocketPayload {
   passThroughMessage: string | null;
@@ -27,12 +28,13 @@ export interface SetPlayerHandPayload extends SocketPayload {
   cardGrid: CardGridView
 }
 
-export interface SetPlayerTurn extends SocketPayload {
+export interface SetPlayerTurnPayload extends SocketPayload {
   action: ServerSocketAction.SetPlayerTurn;
 }
 
-export interface SetDrawnCard extends SocketPayload {
+export interface SetDrawnCardPayload extends SocketPayload {
   action: ServerSocketAction.SetDrawnCard;
+  drawnCard: Partial<Deck>
 }
 
 export enum ClientSocketAction {

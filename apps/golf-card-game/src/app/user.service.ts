@@ -13,6 +13,8 @@ export class UserService {
   readonly isJoiningRoom$ = computed(() => !this._userId());
   readonly websocketSubject = webSocket<SocketPayload>('ws://localhost:3333/ws'); //TODO: handle this, we cannot let it be any value
 
+  readonly PLAYER_NAME = Math.random() + '';
+
   constructor() { }
 
   setUserId(userId: string ) {

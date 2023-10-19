@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   computed,
   Signal,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
@@ -13,6 +14,8 @@ import {
   SocketJoinPayload,
   SocketPayload,
   ServerSocketAction,
+  SetDrawnCardPayload,
+  SetPlayerTurnPayload,
 } from '@golf-card-game/interfaces';
 import { HttpClientModule } from '@angular/common/http';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -38,8 +41,8 @@ import { OthersGameBoardComponent } from './components/OthersGameBoard/others-ga
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  title = 'golf-card-game';
   ROOM_NAME = '123'; //TODO: make this room name unique
+
   currentPlayerGameBoard: Signal<{
     playerName: string;
     cardGrid: CardGridView;
@@ -65,10 +68,23 @@ export class AppComponent {
         };
       });
   });
+
+  currentPlayerTurnName = computed(() => {
+    const currentPlayerTurnId = this.gameBoardService.currentTurnPlayerId();
+    if (this.userService.userId() === currentPlayerTurnId) {
+      return this.userService.PLAYER_NAME;
+    } else {
+      return this.roomService.getPlayerName(currentPlayerTurnId);
+    }
+  });
+  // TODO: clean this component up and start looking into how to send message back and forth to the server. 
+  // Consider the case when user draw from the deck and need to decide what do next
+
   constructor(
     public userService: UserService,
     public gameBoardService: GameBoardService,
-    public roomService: RoomService
+    public roomService: RoomService,
+    private cdr: ChangeDetectorRef
   ) {
     this.initSocketConnection(this.userService.websocketSubject);
   }
@@ -88,7 +104,9 @@ export class AppComponent {
       next: (message) => {
         if (message.action === ServerSocketAction.JoinedSuccess) {
           this.userService.setUserId(message.playerId);
-        } else if (message.action === ServerSocketAction.NewPlayerJoinedSuccess) {
+        } else if (
+          message.action === ServerSocketAction.NewPlayerJoinedSuccess
+        ) {
           this.roomService.addPlayer(
             (message as NewPlayerJoinedSuccessPayload).playerName,
             message.playerId
@@ -100,6 +118,13 @@ export class AppComponent {
             playerName: (message as SetPlayerHandPayload).playerName,
             cardGrid: (message as SetPlayerHandPayload).cardGrid,
           });
+        } else if (message.action === ServerSocketAction.SetDrawnCard) {
+          this.gameBoardService.setDrawnCard(
+            (message as SetDrawnCardPayload).drawnCard
+          );
+        } else if (message.action === ServerSocketAction.SetPlayerTurn) {
+          this.gameBoardService.setCurrentTurnPlayerId(message.playerId);
+          this.cdr.detectChanges();
         }
       },
       error: (err) => console.error(err),
@@ -111,7 +136,7 @@ export class AppComponent {
 
   private joinRoom(subject: WebSocketSubject<SocketPayload>) {
     const socketPayload: SocketJoinPayload = {
-      playerName: Math.random() + '',
+      playerName: this.userService.PLAYER_NAME,
       playerId: '',
       passThroughMessage: null,
       action: ClientSocketAction.Join,

@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import {
   CardGridView,
+  Deck,
   GameBoard,
 } from '@golf-card-game/interfaces';
 
@@ -12,9 +13,21 @@ export class GameBoardService {
     players: {},
   };
   private _gameBoard = signal<GameBoard>(this.GAMEBOARD);
-  gameBoard = this._gameBoard.asReadonly();
+  private _currentDrawnCard = signal<Partial<Deck> | null>(null);
+  private _currentTurnPlayerId = signal<string>('');
 
+  readonly gameBoard = this._gameBoard.asReadonly();
+  readonly currentDrawnCard = this._currentDrawnCard.asReadonly();
+  readonly currentTurnPlayerId = this._currentTurnPlayerId.asReadonly();
   constructor() {}
+
+  setCurrentTurnPlayerId(id: string) {
+    this._currentTurnPlayerId.set(id);
+  }
+
+  setDrawnCard(card: Partial<Deck>) {
+    this._currentDrawnCard.set(card);
+  }
 
   setPlayerHand(
     playerId: string,

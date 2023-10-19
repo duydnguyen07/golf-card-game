@@ -7,14 +7,26 @@
 <button (click)="deal()">Deal</button>
 
 <div>
-    <golf-card-game-others-game-board
-        [players]="otherPlayerBoards()"
-    ></golf-card-game-others-game-board>
+  <golf-card-game-others-game-board
+    [players]="otherPlayerBoards()"
+  ></golf-card-game-others-game-board>
   <!-- <div *ngFor="let player of otherPlayerBoards()">
     {{ player.playerName }}
   </div> -->
 </div>
 
+<div>
+  
+  <h2>Drawn Card</h2>
+  <button>Pick card</button>
+  <span>{{ gameBoardService.currentDrawnCard() }}</span>
+  <div>
+    <button>Draw from deck</button>
+  </div>
+
+  CurrentPlayer's turn:
+  {{currentPlayerTurnName()}}
+</div>
 
 <div class="game-board">
   <golf-card-game-my-game-board

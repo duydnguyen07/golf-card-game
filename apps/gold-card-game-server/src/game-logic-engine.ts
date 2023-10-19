@@ -1,28 +1,38 @@
-import { Deck, Rooms, SocketPayload } from '@golf-card-game/interfaces';
+import { Deck, Room, Rooms, SocketPayload } from '@golf-card-game/interfaces';
 
 function getNextActions(payload: SocketPayload) {}
 
-function drawACard(roomDatabase: Rooms, room: string): {
+function drawACard(leftOverCards: Partial<Deck>[]): {
     leftOverCards: Partial<Deck>[],
     drawnCard: Partial<Deck>
 } | undefined {
-  if (roomDatabase[room]?.leftOverCards.length > 0) {
-    const leftOverCards = [
-        ...roomDatabase[room].leftOverCards
-    ];
+  if (leftOverCards.length > 0) {
     const randomlyDrawnCardIndex = Math.floor(
       Math.random() * (leftOverCards.length - 1)
     );
     
-    const drawnCard = roomDatabase[room].leftOverCards.splice(randomlyDrawnCardIndex, 1)[0];
+    const drawnCard = leftOverCards.splice(randomlyDrawnCardIndex, 1)[0];
 
     return {
         leftOverCards,
         drawnCard
     };
   } else {
-    console.error('Cannot draw card for room without any left over cards');
+    console.error('Cannot draw card without any leftover cards', JSON.stringify(leftOverCards));
   }
 }
 
-export { getNextActions, drawACard };
+function getNextPlayerId(room: Room) {
+  const playerIds = Object.keys(room.players);
+  const randomPlayerIndex = Math.floor(Math.random()*(playerIds.length - 1));
+  let result = playerIds[randomPlayerIndex];
+  const indexOfCurrentPlayer = playerIds.indexOf(room.currentTurnPlayerId);
+
+  if(indexOfCurrentPlayer > -1) {
+    result = playerIds[(indexOfCurrentPlayer + 1) % playerIds.length]
+  } 
+  
+  return result;
+}
+
+export { drawACard, getNextPlayerId };

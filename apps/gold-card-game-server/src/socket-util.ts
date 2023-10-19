@@ -1,4 +1,4 @@
-import { PlayerProfile, Rooms } from '@golf-card-game/interfaces';
+import { PlayerProfile, Room, Rooms } from '@golf-card-game/interfaces';
 
 function sendMessageToOtherPlayersInRoom(
   rooms: Rooms,
@@ -11,6 +11,9 @@ function sendMessageToOtherPlayersInRoom(
       // Prevent sending to self
       if (uuid !== sourceUuid) {
         playerProfile.socket.send(passThroughMessage);
+        logAuditTrail(rooms[room], {
+          [playerProfile.playerName]: passThroughMessage
+        })
       }
     }
   );
@@ -24,8 +27,15 @@ function broadcastMessageToAllPlayersInRoom(
   Object.entries(rooms[room].players).forEach(
     ([_, playerProfile]: [string, PlayerProfile]) => {
       playerProfile.socket.send(passThroughMessage);
+      logAuditTrail(rooms[room], {
+        [playerProfile.playerName]: passThroughMessage
+      })
     }
   );
 }
 
-export { sendMessageToOtherPlayersInRoom, broadcastMessageToAllPlayersInRoom };
+function logAuditTrail(currentRoom: Room, record: Record<string, string>) {
+  currentRoom.gameAuditTrail.push(record)
+}
+
+export { sendMessageToOtherPlayersInRoom, broadcastMessageToAllPlayersInRoom, logAuditTrail };

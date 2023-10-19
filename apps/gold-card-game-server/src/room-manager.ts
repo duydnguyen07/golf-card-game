@@ -11,7 +11,7 @@ import {
 } from '@golf-card-game/interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocket } from 'ws';
-import { sendMessageToOtherPlayersInRoom } from './socket-util';
+import { logAuditTrail, sendMessageToOtherPlayersInRoom } from './socket-util';
 
 const ROOM_DATABASE: Rooms = {};
 
@@ -55,8 +55,6 @@ function handleRoomSetup(socket: WebSocket) {
       if (action === ClientSocketAction.Join) {
         const playerName = (parsedData as SocketJoinPayload).playerName;
         handleJoinAction(ROOM_DATABASE, room, uuid, socket, playerName);
-
-        console.log('rooms', ROOM_DATABASE);
       } else if (action === ClientSocketAction.Leave) {
         leave(room);
       } else if (action === ClientSocketAction.PassThrough) {
@@ -107,7 +105,7 @@ function handleJoinAction(
       cards: generateCardGrid() ,
     }; // join the room
 
-    notifyUserAboutRoomJoinSuccess(rooms, room, uuid, socket);
+    notifyUserAboutRoomJoinSuccess(rooms, room, uuid, socket, playerName);
     notifyExistingPlayersAboutNewPlayer(rooms, room, uuid, playerName);
   }
 }
@@ -137,7 +135,8 @@ function notifyUserAboutRoomJoinSuccess(
   rooms: Rooms,
   room: string,
   uuid: string,
-  socket: WebSocket
+  socket: WebSocket,
+  playerName: string
 ) {
   // Notify current user of successful room
   const joinedSuccessfulPayload: SocketPayload = {
@@ -146,7 +145,9 @@ function notifyUserAboutRoomJoinSuccess(
     room: room,
     playerId: uuid,
   };
-  socket.send(JSON.stringify(joinedSuccessfulPayload));
+  const passThroughMessage = JSON.stringify(joinedSuccessfulPayload)
+  socket.send(passThroughMessage);
+  logAuditTrail(rooms[room], {[playerName]: passThroughMessage})
 
   // Notify current user about existing players
   Object.keys(rooms[room].players).forEach((existingPlayerId: string) => {
@@ -160,6 +161,7 @@ function notifyUserAboutRoomJoinSuccess(
         playerName: existingPlayer.playerName,
       };
       socket.send(JSON.stringify(existingPlayerPayload));
+      logAuditTrail(rooms[room], {[playerName]: passThroughMessage})
     }
   });
 }

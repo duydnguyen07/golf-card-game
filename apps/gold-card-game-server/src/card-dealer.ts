@@ -5,12 +5,12 @@ import {
   CardSuite,
   Deck,
   PlayerProfile,
-  Rooms,
   SetPlayerHandPayload,
-  ClientSocketAction,
   ServerSocketAction,
+  Room,
 } from '@golf-card-game/interfaces';
 import { WebSocket } from 'ws';
+import { logAuditTrail } from './socket-util';
 
 const deck: Deck = [
   CardSuite.Two_Spade,
@@ -155,19 +155,25 @@ function dealCardToEachPlayer(inputs: {
   return result;
 }
 
-function notifyAllPlayersAboutDealtCards(playersInRoom: [string, PlayerProfile][], room: string) {
+function notifyAllPlayersAboutDealtCards(
+  playersInRoom: [string, PlayerProfile][],
+  room: string,
+  currentRoom: Room
+) {
   playersInRoom.forEach(([currentPlayerId, currentPlayerProfile]) => {
     notifyCurrentPlayerAboutTheirCard(
       currentPlayerProfile.socket,
       room,
       currentPlayerProfile,
-      currentPlayerId
+      currentPlayerId,
+      currentRoom
     );
     notifyCurrentPlayerAboutOtherPlayersCard(
       room,
       currentPlayerProfile.socket,
       currentPlayerId,
-      playersInRoom
+      playersInRoom,
+      currentRoom
     );
   });
 }
@@ -176,7 +182,8 @@ function notifyCurrentPlayerAboutTheirCard(
   socket: WebSocket,
   room: string,
   currentPlayerProfile: PlayerProfile,
-  currentPlayerId: string
+  currentPlayerId: string,
+  currentRoom: Room
 ) {
   const payload: SetPlayerHandPayload = {
     action: ServerSocketAction.SetPlayerHand,
@@ -196,15 +203,17 @@ function notifyCurrentPlayerAboutTheirCard(
       return index === 0 ? { ...cardProfile } : { ...cardProfile, name: null };
     }),
   };
-
-  socket.send(JSON.stringify(payload));
+  const message = JSON.stringify(payload);
+  socket.send(message);
+  logAuditTrail(currentRoom, {[currentPlayerProfile.playerName]: message});
 }
 
 function notifyCurrentPlayerAboutOtherPlayersCard(
   room: string,
   currentPlayerSocket: WebSocket,
   currentPlayerId: string,
-  playersInRoom: [string, PlayerProfile][]
+  playersInRoom: [string, PlayerProfile][],
+  currentRoom: Room
 ) {
   playersInRoom.forEach(([otherPlayerId, playerProfile]) => {
     if (otherPlayerId !== currentPlayerId) {
@@ -222,8 +231,10 @@ function notifyCurrentPlayerAboutOtherPlayersCard(
         col2: convertToMaskedColumn(payload.cardGrid.col2),
         col3: convertToMaskedColumn(payload.cardGrid.col3),
       };
+      const message = JSON.stringify(payload);
+      currentPlayerSocket.send(message);
 
-      currentPlayerSocket.send(JSON.stringify(payload));
+      logAuditTrail(currentRoom, {[currentRoom.players[currentPlayerId].playerName]: message})
     }
   });
 }

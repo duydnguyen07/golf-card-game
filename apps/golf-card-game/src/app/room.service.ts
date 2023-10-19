@@ -24,4 +24,9 @@ export class RoomService {
       currentPlayers.filter((player) => player.id !== idToRemove)
     );
   }
+
+  getPlayerName(id: string) {
+    return this._otherPlayers().find((otherPlayer) => otherPlayer.id === id)
+      ?.name;
+  }
 }
