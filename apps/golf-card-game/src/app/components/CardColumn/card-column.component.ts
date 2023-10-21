@@ -12,6 +12,9 @@ import { Deck } from '@golf-card-game/interfaces';
 })
 export class CardColumnComponent {
   @Input()
+  readonly!: boolean;
+
+  @Input()
   column!: {
     isRevealed: boolean;
     name: Partial<Deck> | null;

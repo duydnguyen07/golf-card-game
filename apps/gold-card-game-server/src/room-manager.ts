@@ -29,7 +29,6 @@ function handleRoomSetup(socket: WebSocket) {
     else {
       delete ROOM_DATABASE[room].players[uuid];
       const userLeftPayload: ExistingPlayerLeftPayload = {
-        passThroughMessage: null,
         action: ServerSocketAction.ExistingPlayerLeft,
         room: room,
         playerId: uuid,
@@ -47,27 +46,14 @@ function handleRoomSetup(socket: WebSocket) {
     try {
       const parsedData = JSON.parse(data) as SocketPayload;
 
-      const passThroughMessage = parsedData.passThroughMessage,
-        action = parsedData.action,
-        room = parsedData.room,
-        playerId = parsedData.playerId;
+      const action = parsedData.action,
+        room = parsedData.room;
 
       if (action === ClientSocketAction.Join) {
         const playerName = (parsedData as SocketJoinPayload).playerName;
         handleJoinAction(ROOM_DATABASE, room, uuid, socket, playerName);
       } else if (action === ClientSocketAction.Leave) {
         leave(room);
-      } else if (action === ClientSocketAction.PassThrough) {
-        if (ROOM_DATABASE[room]) {
-          sendMessageToOtherPlayersInRoom(
-            ROOM_DATABASE,
-            room,
-            playerId,
-            passThroughMessage
-          );
-        } else {
-          console.warn('Warning: Unknown room for the following data', data);
-        }
       }
     } catch (e) {
       console.error(e);
@@ -95,7 +81,7 @@ function handleJoinAction(
       status: RoomStatus.Waiting,
       drawnCard: null,
       currentTurnPlayerId: '',
-      lastPlayerTurnId: ''
+      lastRoundTriggeredByPlayerId: null
     }; // create the room
   }
   if (!rooms[room].players[uuid]) {
@@ -117,7 +103,6 @@ function notifyExistingPlayersAboutNewPlayer(
   playerName: string
 ) {
   const newPlayerJoinedSuccessPayload: NewPlayerJoinedSuccessPayload = {
-    passThroughMessage: null,
     action: ServerSocketAction.NewPlayerJoinedSuccess,
     room: room,
     playerId: uuid,
@@ -140,7 +125,6 @@ function notifyUserAboutRoomJoinSuccess(
 ) {
   // Notify current user of successful room
   const joinedSuccessfulPayload: SocketPayload = {
-    passThroughMessage: null,
     action: ServerSocketAction.JoinedSuccess,
     room: room,
     playerId: uuid,
@@ -154,7 +138,6 @@ function notifyUserAboutRoomJoinSuccess(
     const existingPlayer = rooms[room].players[existingPlayerId];
     if (existingPlayerId !== uuid) {
       const existingPlayerPayload: NewPlayerJoinedSuccessPayload = {
-        passThroughMessage: null,
         action: ServerSocketAction.NewPlayerJoinedSuccess,
         room: room,
         playerId: existingPlayerId,

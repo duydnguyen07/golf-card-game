@@ -191,7 +191,6 @@ function notifyCurrentPlayerAboutTheirCard(
     cardGrid: currentPlayerProfile.cards,
     room,
     playerId: currentPlayerId,
-    passThroughMessage: null,
   };
 
   payload.cardGrid = {
@@ -223,7 +222,6 @@ function notifyCurrentPlayerAboutOtherPlayersCard(
         cardGrid: playerProfile.cards,
         room,
         playerId: otherPlayerId,
-        passThroughMessage: null,
       };
 
       payload.cardGrid = {

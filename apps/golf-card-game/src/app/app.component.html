@@ -10,18 +10,15 @@
   <golf-card-game-others-game-board
     [players]="otherPlayerBoards()"
   ></golf-card-game-others-game-board>
-  <!-- <div *ngFor="let player of otherPlayerBoards()">
-    {{ player.playerName }}
-  </div> -->
 </div>
 
-<div>
+<div class="center-deck">
   
   <h2>Drawn Card</h2>
-  <button>Pick card</button>
+  <button [disabled]="!isMyTurn()">Pick card</button>
   <span>{{ gameBoardService.currentDrawnCard() }}</span>
   <div>
-    <button>Draw from deck</button>
+    <button [disabled]="!isMyTurn()">Draw from deck</button>
   </div>
 
   CurrentPlayer's turn:
@@ -30,6 +27,8 @@
 
 <div class="game-board">
   <golf-card-game-my-game-board
+    [isMyTurn]="isMyTurn()"
     [currentPlayer]="currentPlayerGameBoard()"
+    (revealCard)="revealCard($event)"
   ></golf-card-game-my-game-board>
 </div>

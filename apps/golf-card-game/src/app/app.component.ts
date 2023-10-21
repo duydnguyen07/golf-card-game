@@ -15,7 +15,8 @@ import {
   SocketPayload,
   ServerSocketAction,
   SetDrawnCardPayload,
-  SetPlayerTurnPayload,
+  CardPosition,
+  RevealCardPayload,
 } from '@golf-card-game/interfaces';
 import { HttpClientModule } from '@angular/common/http';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -77,7 +78,12 @@ export class AppComponent {
       return this.roomService.getPlayerName(currentPlayerTurnId);
     }
   });
-  // TODO: clean this component up and start looking into how to send message back and forth to the server. 
+
+  isMyTurn = computed(() => {
+    const currentPlayerTurnId = this.gameBoardService.currentTurnPlayerId();
+    return this.userService.userId() === currentPlayerTurnId;
+  });
+  // TODO: clean this component up and start looking into how to send message back and forth to the server.
   // Consider the case when user draw from the deck and need to decide what do next
 
   constructor(
@@ -92,11 +98,21 @@ export class AppComponent {
   deal() {
     this.gameBoardService.reset();
     this.userService.websocketSubject.next({
-      passThroughMessage: null,
       action: ClientSocketAction.StartGame,
       room: this.ROOM_NAME,
       playerId: this.userService.userId(),
     });
+  }
+
+  revealCard(cardPosition: CardPosition) {
+    const payload: RevealCardPayload = {
+      action: ClientSocketAction.RevealCard,
+      room: this.ROOM_NAME,
+      playerId: this.userService.userId(),
+      cardPosition
+    }
+
+    this.userService.websocketSubject.next(payload);
   }
 
   private initSocketConnection(subject: WebSocketSubject<SocketPayload>) {
@@ -138,7 +154,6 @@ export class AppComponent {
     const socketPayload: SocketJoinPayload = {
       playerName: this.userService.PLAYER_NAME,
       playerId: '',
-      passThroughMessage: null,
       action: ClientSocketAction.Join,
       room: this.ROOM_NAME,
     };

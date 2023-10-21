@@ -1,7 +1,5 @@
 import { Deck, Room, Rooms, SocketPayload } from '@golf-card-game/interfaces';
 
-function getNextActions(payload: SocketPayload) {}
-
 function drawACard(leftOverCards: Partial<Deck>[]): {
     leftOverCards: Partial<Deck>[],
     drawnCard: Partial<Deck>

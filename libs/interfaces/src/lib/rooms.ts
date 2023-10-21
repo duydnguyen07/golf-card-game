@@ -12,7 +12,7 @@ export type Room = {
   drawnCard: Partial<Deck> | null;
   status: RoomStatus;
   currentTurnPlayerId: string;
-  lastPlayerTurnId: string;
+  lastRoundTriggeredByPlayerId: string | null;
 }
 
 export type Rooms = {

@@ -6,6 +6,7 @@
     <ng-container *ngIf="!item.isRevealed">
       <div [title]="item.name || ''">
         <button
+          [disabled]="readonly"
           (click)="
             cardClicked.emit({
               cardPositionIndex: index

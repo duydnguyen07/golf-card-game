@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardGridView } from '@golf-card-game/interfaces';
+import { CardGridView, CardPosition } from '@golf-card-game/interfaces';
 import { CardColumnComponent } from '../CardColumn/card-column.component';
 
 @Component({
@@ -19,19 +19,23 @@ import { CardColumnComponent } from '../CardColumn/card-column.component';
 })
 export class MyGameBoardComponent {
   @Input()
+  isMyTurn!: boolean;
+
+  @Input()
   currentPlayer!: {
     playerName: string;
     cardGrid: CardGridView;
   } | null;
 
   @Output()
-  revealCard = new EventEmitter<{
-    columnIndex: number;
-    cardPositionIndex: number;
-  }>();
+  revealCard = new EventEmitter<CardPosition>();
 
-  ngOnChanges() {
-    console.log('MyGameBoardComponent', this.currentPlayer)
-    //TODO: implement reveal card action 
+  notifyCardClicked(columnIndex: number, event: {
+    cardPositionIndex: number;
+  }) {
+    this.revealCard.emit({
+      columnIndex,
+      cardPositionIndex: event.cardPositionIndex
+    })
   }
 }
