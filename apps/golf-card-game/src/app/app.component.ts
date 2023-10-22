@@ -17,6 +17,9 @@ import {
   SetDrawnCardPayload,
   CardPosition,
   RevealCardPayload,
+  SetRevealedCardPayload,
+  SetLastRoundPayload,
+  GameEndedPayload,
 } from '@golf-card-game/interfaces';
 import { HttpClientModule } from '@angular/common/http';
 import { WebSocketSubject } from 'rxjs/webSocket';
@@ -83,8 +86,6 @@ export class AppComponent {
     const currentPlayerTurnId = this.gameBoardService.currentTurnPlayerId();
     return this.userService.userId() === currentPlayerTurnId;
   });
-  // TODO: clean this component up and start looking into how to send message back and forth to the server.
-  // Consider the case when user draw from the deck and need to decide what do next
 
   constructor(
     public userService: UserService,
@@ -109,8 +110,18 @@ export class AppComponent {
       action: ClientSocketAction.RevealCard,
       room: this.ROOM_NAME,
       playerId: this.userService.userId(),
-      cardPosition
-    }
+      cardPosition,
+    };
+
+    this.userService.websocketSubject.next(payload);
+  }
+
+  revealAllCards() {
+    const payload: SocketPayload = {
+      action: ClientSocketAction.RevealAllCards,
+      room: this.ROOM_NAME,
+      playerId: this.userService.userId(),
+    };
 
     this.userService.websocketSubject.next(payload);
   }
@@ -140,6 +151,21 @@ export class AppComponent {
           );
         } else if (message.action === ServerSocketAction.SetPlayerTurn) {
           this.gameBoardService.setCurrentTurnPlayerId(message.playerId);
+          this.cdr.detectChanges();
+        } else if (message.action === ServerSocketAction.SetRevealedCard) {
+          this.gameBoardService.setRevealedCard(
+            message.playerId,
+            (message as SetRevealedCardPayload).revealedCard,
+            (message as SetRevealedCardPayload).cardPosition
+          );
+          this.cdr.detectChanges();
+        } else if (message.action === ServerSocketAction.SetLastRound) {
+          this.gameBoardService.setLastRound(true);
+          this.cdr.detectChanges();
+        } else if (message.action === ServerSocketAction.GameEnded) {
+          this.gameBoardService.setWinnerName((message as GameEndedPayload).playerName);
+          this.gameBoardService.setWinnerId(message.playerId);
+          this.gameBoardService.setGameOver(true);
           this.cdr.detectChanges();
         }
       },

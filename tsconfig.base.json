@@ -15,7 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@golf-card-game/interfaces": ["libs/interfaces/src/index.ts"]
+      "@golf-card-game/interfaces": ["libs/interfaces/src/index.ts"],
+      "@golf-card-game/shared-game-logic": [
+        "libs/shared-game-logic/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

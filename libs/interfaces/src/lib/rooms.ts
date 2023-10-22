@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
-import { Deck } from './deck';
 import { CardGrid } from './card-grid';
+import { CardInADeck } from './card';
 
 
 export type Room = {
@@ -8,11 +8,12 @@ export type Room = {
   players: {
     [socketUuid in string]: PlayerProfile;
   };
-  leftOverCards: Partial<Deck>[];
-  drawnCard: Partial<Deck> | null;
+  leftOverCards: CardInADeck[];
+  drawnCard: CardInADeck;
   status: RoomStatus;
   currentTurnPlayerId: string;
   lastRoundTriggeredByPlayerId: string | null;
+  isGameOver: boolean;
 }
 
 export type Rooms = {

@@ -3,16 +3,16 @@ import {
   Card,
   CardGrid,
   CardSuite,
-  Deck,
   PlayerProfile,
   SetPlayerHandPayload,
   ServerSocketAction,
   Room,
+  CardInADeck,
 } from '@golf-card-game/interfaces';
 import { WebSocket } from 'ws';
 import { logAuditTrail } from './socket-util';
 
-const deck: Deck = [
+const deck: CardInADeck[] = [
   CardSuite.Two_Spade,
   CardSuite.Three_Spade,
   CardSuite.Four_Spade,
@@ -76,10 +76,10 @@ function deal9Cards(
   dealtCardsPerPlayer: {
     [playerIndex in number]: CardGrid;
   };
-  leftOver: Partial<Deck>[];
+  leftOver: CardInADeck[];
 } {
   const CARD_NUMBER_PER_PLAYER = 9;
-  let fullDeck: Deck[] = [];
+  let fullDeck: CardInADeck[] = [];
 
   for (let count = 0; count < deckCount; count++) {
     fullDeck = fullDeck.concat([...deck]);
@@ -113,15 +113,15 @@ function dealCardToEachPlayer(inputs: {
   playerCount: number;
   cardNumberPerPlayer: number;
   cardIndexSet: Set<number>;
-  fullDeck: Deck[];
+  fullDeck: CardInADeck[];
 }): {
   [playerIndex in number]: CardGrid;
 } {
-  const dealtCards: Partial<Deck> = [...inputs.cardIndexSet.values()].map(
+  const dealtCards: CardInADeck[] = [...inputs.cardIndexSet.values()].map(
     (deckIndex: number) => {
       return inputs.fullDeck[deckIndex];
     }
-  ) as unknown as Partial<Deck>;
+  ) as unknown as CardInADeck[];
 
   const result: {
     [playerIndex in number]: CardGrid;
@@ -131,7 +131,7 @@ function dealCardToEachPlayer(inputs: {
     const playerIndex = Math.floor(i / inputs.cardNumberPerPlayer);
     const cardProfile = {
       isRevealed: false,
-      name: dealtCards[i] as unknown as Partial<Deck>,
+      name: dealtCards[i] as CardInADeck,
     };
     if (!!result[playerIndex]) {
       const remainder = i % COLUMN_COUNT;
@@ -240,7 +240,7 @@ function notifyCurrentPlayerAboutOtherPlayersCard(
 function convertToMaskedColumn(
   column: {
     isRevealed: boolean;
-    name: Partial<Deck> | null;
+    name: CardInADeck | null;
   }[]
 ) {
   return column.map((cardProfile) => ({

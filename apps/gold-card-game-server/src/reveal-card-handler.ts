@@ -1,6 +1,6 @@
 import {
+  CardInADeck,
   CardPosition,
-  Deck,
   NotifyErrorPayload,
   PlayerProfile,
   Rooms,
@@ -25,7 +25,7 @@ function handleRevealCard({
   const playerProfile = room.players[playerId];
   const cardInfo: {
     isRevealed: boolean;
-    name: Partial<Deck>;
+    name: CardInADeck;
   } | null = getAndRevealCardAtPosition(cardPosition, playerProfile);
 
   if (cardInfo) {
@@ -34,6 +34,7 @@ function handleRevealCard({
       room: roomName,
       playerId,
       revealedCard: cardInfo.name,
+      cardPosition: cardPosition
     };
 
     broadcastMessageToAllPlayersInRoom(
@@ -43,7 +44,7 @@ function handleRevealCard({
     );
 
     const hasRevealedAll = hasThisPlayerRevealAllCards(playerProfile);
-    if (hasRevealedAll && room.lastRoundTriggeredByPlayerId) {
+    if (hasRevealedAll && !room.lastRoundTriggeredByPlayerId) {
       room.lastRoundTriggeredByPlayerId = playerId;
 
       const payload: SetLastRoundPayload = {
@@ -94,7 +95,7 @@ function getAndRevealCardAtPosition(
 ) {
   let card: {
     isRevealed: boolean;
-    name: Partial<Deck>;
+    name: CardInADeck;
   } | null = null;
 
   if (cardPosition.columnIndex === 0) {

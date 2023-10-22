@@ -1,9 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 import {
   CardGridView,
-  Deck,
+  CardInADeck,
+  CardPosition,
   GameBoard,
 } from '@golf-card-game/interfaces';
+import { cloneDeep } from 'lodash';
 
 @Injectable({
   providedIn: 'root',
@@ -13,19 +15,44 @@ export class GameBoardService {
     players: {},
   };
   private _gameBoard = signal<GameBoard>(this.GAMEBOARD);
-  private _currentDrawnCard = signal<Partial<Deck> | null>(null);
+  private _currentDrawnCard = signal<CardInADeck | null>(null);
   private _currentTurnPlayerId = signal<string>('');
+  private _isLastRound = signal(false);
+  private _isGameOver = signal(false);
+  private _winnerName = signal('');
+  private _winnerId = signal('');
 
   readonly gameBoard = this._gameBoard.asReadonly();
   readonly currentDrawnCard = this._currentDrawnCard.asReadonly();
   readonly currentTurnPlayerId = this._currentTurnPlayerId.asReadonly();
+  readonly isLastRound = this._isLastRound.asReadonly();
+  readonly isGameOver = this._isGameOver.asReadonly();
+  readonly winnerId = this._winnerId.asReadonly();
+  readonly winnerName = this._winnerName.asReadonly();
+
   constructor() {}
+
+  setWinnerId(value: string) {
+    this._winnerId.set(value);
+  }
+
+  setWinnerName(value: string) {
+    this._winnerName.set(value);
+  }
+
+  setGameOver(value: boolean) {
+    this._isGameOver.set(value);
+  }
+
+  setLastRound(value: boolean) {
+    this._isLastRound.set(value);
+  }
 
   setCurrentTurnPlayerId(id: string) {
     this._currentTurnPlayerId.set(id);
   }
 
-  setDrawnCard(card: Partial<Deck>) {
+  setDrawnCard(card: CardInADeck) {
     this._currentDrawnCard.set(card);
   }
 
@@ -39,8 +66,34 @@ export class GameBoardService {
     this._gameBoard.mutate((value: GameBoard) => {
       value.players[playerId] = hand;
     });
+  }
 
-    console.log(this._gameBoard())
+  setRevealedCard(
+    playerId: string,
+    cardName: CardInADeck,
+    cardPosition: CardPosition
+  ) {
+    this._gameBoard.mutate((value: GameBoard) => {
+      const clonedPlayerHand = cloneDeep(value.players[playerId]);
+
+      const playerCardGrid = clonedPlayerHand.cardGrid;
+      const newCardRecord: {
+        isRevealed: boolean;
+        name: CardInADeck;
+      } = {
+        isRevealed: true,
+        name: cardName,
+      };
+      if (cardPosition.columnIndex === 0) {
+        playerCardGrid.col1[cardPosition.cardPositionIndex] = newCardRecord;
+      } else if (cardPosition.columnIndex === 1) {
+        playerCardGrid.col2[cardPosition.cardPositionIndex] = newCardRecord;
+      } else if (cardPosition.columnIndex === 2) {
+        playerCardGrid.col3[cardPosition.cardPositionIndex] = newCardRecord;
+      }
+
+      value.players[playerId] = clonedPlayerHand;
+    });
   }
 
   reset() {

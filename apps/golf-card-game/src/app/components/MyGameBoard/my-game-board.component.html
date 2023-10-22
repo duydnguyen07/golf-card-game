@@ -4,19 +4,23 @@
 
   <div class="card-columns">
     <golf-card-game-card-column
-      [readonly]="!isMyTurn"
+      [readonly]="isDisabled"
       [column]="currentPlayer.cardGrid.col1"
       (cardClicked)="notifyCardClicked(0, $event)"
     ></golf-card-game-card-column>
     <golf-card-game-card-column
-      [readonly]="!isMyTurn"
+      [readonly]="isDisabled"
       [column]="currentPlayer.cardGrid.col2"
       (cardClicked)="notifyCardClicked(1, $event)"
     ></golf-card-game-card-column>
     <golf-card-game-card-column
-      [readonly]="!isMyTurn"
+      [readonly]="isDisabled"
       [column]="currentPlayer.cardGrid.col3"
       (cardClicked)="notifyCardClicked(2, $event)"
     ></golf-card-game-card-column>
+  </div>
+
+  <div>
+    Total Points: {{currentPlayer.cardGrid | totalPoints}}
   </div>
 </div>

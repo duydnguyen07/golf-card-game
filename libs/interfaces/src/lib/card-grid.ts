@@ -1,32 +1,32 @@
-import { Deck } from './deck';
+import { CardInADeck } from './card';
 
 export interface CardGrid {
   col1: {
     isRevealed: boolean;
-    name: Partial<Deck>;
+    name: CardInADeck;
   }[];
   col2: {
     isRevealed: boolean;
-    name: Partial<Deck>;
+    name: CardInADeck;
   }[];
   col3: {
     isRevealed: boolean;
-    name: Partial<Deck>;
+    name: CardInADeck;
   }[];
 }
 
 export interface CardGridView {
   col1: {
     isRevealed: boolean;
-    name: Partial<Deck> | null;
+    name: CardInADeck | null;
   }[];
   col2: {
     isRevealed: boolean;
-    name: Partial<Deck> | null;
+    name: CardInADeck | null;
   }[];
   col3: {
     isRevealed: boolean;
-    name: Partial<Deck> | null;
+    name: CardInADeck | null;
   }[];
 }
 
@@ -41,4 +41,8 @@ export function generateCardGrid(): CardGrid {
 export interface CardPosition {
   columnIndex: number;
   cardPositionIndex: number;
+}
+
+export type Score = {
+  [playerId in string]: number;
 }

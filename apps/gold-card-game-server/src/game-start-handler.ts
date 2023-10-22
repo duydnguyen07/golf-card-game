@@ -1,6 +1,6 @@
 import {
   CardGrid,
-  Deck,
+  CardInADeck,
   Room,
   Rooms,
   ServerSocketAction,
@@ -19,7 +19,7 @@ function handleStartGame(roomDatabase: Rooms, roomName: string) {
     dealtCardsPerPlayer: {
       [key in number]: CardGrid;
     };
-    leftOver: Partial<Deck>[];
+    leftOver: CardInADeck[];
   } = deal9Cards(3, playersInRoom.length);
 
   // Set cards to room
@@ -36,39 +36,8 @@ function handleStartGame(roomDatabase: Rooms, roomName: string) {
     roomName,
     roomDatabase,
   });
-
-  getNextPlayerIdAndUpdatePlayersAndRoom({
-    currentRoom,
-    roomName,
-    roomDatabase,
-  });
 }
 
-function getNextPlayerIdAndUpdatePlayersAndRoom({
-  currentRoom,
-  roomName,
-  roomDatabase,
-}: {
-  currentRoom: Room;
-  roomName: string;
-  roomDatabase: Rooms;
-}) {
-  const nextTurnsPlayerId = getNextPlayerId(currentRoom);
-
-  currentRoom.currentTurnPlayerId = nextTurnsPlayerId;
-
-  const setPlayerTurnPayload: SetPlayerTurnPayload = {
-    action: ServerSocketAction.SetPlayerTurn,
-    room: roomName,
-    playerId: nextTurnsPlayerId,
-  };
-
-  broadcastMessageToAllPlayersInRoom(
-    roomDatabase,
-    roomName,
-    JSON.stringify(setPlayerTurnPayload)
-  );
-}
 
 function drawCardAndUpdatePlayersAndRoom({
   currentRoom,
@@ -77,7 +46,7 @@ function drawCardAndUpdatePlayersAndRoom({
   roomDatabase,
 }: {
   currentRoom: Room;
-  leftOverCards: Partial<Deck>[];
+  leftOverCards: CardInADeck[];
   roomName: string;
   roomDatabase: Rooms;
 }) {

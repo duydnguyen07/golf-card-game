@@ -71,6 +71,8 @@ export enum Card {
     Joker2 = 'Joker2'
 }
 
+export type CardInADeck = CardSuite | Extract<Card, Card.Joker1 | Card.Joker2>
+
 export enum Suite {
     Spade = 'Spade',
     Club = 'Club',

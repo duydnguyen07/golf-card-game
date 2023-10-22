@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Deck } from '@golf-card-game/interfaces';
+import { CardInADeck } from '@golf-card-game/interfaces';
 
 @Component({
   selector: 'golf-card-game-view-only-card-column',
@@ -14,6 +14,6 @@ export class ViewOnlyCardColumnComponent {
   @Input()
   column!: {
     isRevealed: boolean;
-    name: Partial<Deck> | null;
+    name: CardInADeck | null;
   }[];
 }

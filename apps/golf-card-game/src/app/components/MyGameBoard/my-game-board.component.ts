@@ -4,22 +4,24 @@ import {
   EventEmitter,
   Input,
   Output,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardGridView, CardPosition } from '@golf-card-game/interfaces';
 import { CardColumnComponent } from '../CardColumn/card-column.component';
+import { TotalPointsPipe } from '../../pipes/total-points.pipe';
 
 @Component({
   selector: 'golf-card-game-my-game-board',
   standalone: true,
-  imports: [CommonModule, CardColumnComponent],
+  imports: [CommonModule, CardColumnComponent, TotalPointsPipe],
   templateUrl: './my-game-board.component.html',
   styleUrls: ['./my-game-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyGameBoardComponent {
   @Input()
-  isMyTurn!: boolean;
+  isDisabled!: boolean;
 
   @Input()
   currentPlayer!: {

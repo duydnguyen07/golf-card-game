@@ -1,8 +1,8 @@
-import { Deck, Room, Rooms, SocketPayload } from '@golf-card-game/interfaces';
+import { CardInADeck, Room, Rooms, SocketPayload } from '@golf-card-game/interfaces';
 
-function drawACard(leftOverCards: Partial<Deck>[]): {
-    leftOverCards: Partial<Deck>[],
-    drawnCard: Partial<Deck>
+function drawACard(leftOverCards: CardInADeck[]): {
+    leftOverCards: CardInADeck[],
+    drawnCard: CardInADeck
 } | undefined {
   if (leftOverCards.length > 0) {
     const randomlyDrawnCardIndex = Math.floor(

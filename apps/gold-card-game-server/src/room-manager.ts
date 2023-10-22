@@ -81,7 +81,8 @@ function handleJoinAction(
       status: RoomStatus.Waiting,
       drawnCard: null,
       currentTurnPlayerId: '',
-      lastRoundTriggeredByPlayerId: null
+      lastRoundTriggeredByPlayerId: null,
+      isGameOver: false,
     }; // create the room
   }
   if (!rooms[room].players[uuid]) {

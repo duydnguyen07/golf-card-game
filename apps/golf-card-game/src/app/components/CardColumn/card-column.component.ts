@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Deck } from '@golf-card-game/interfaces';
+import { CardInADeck } from '@golf-card-game/interfaces';
 
 @Component({
   selector: 'golf-card-game-card-column',
@@ -17,7 +17,7 @@ export class CardColumnComponent {
   @Input()
   column!: {
     isRevealed: boolean;
-    name: Partial<Deck> | null;
+    name: CardInADeck | null;
   }[];
 
   @Output()
