@@ -39,7 +39,7 @@ import { CenterDeckComponent } from './components/CenterDeck/center-deck.compone
     HttpClientModule,
     CommonModule,
     MyGameBoardComponent,
-    CenterDeckComponent
+    CenterDeckComponent,
   ],
   selector: 'golf-card-game-root',
   templateUrl: './app.component.html',
@@ -47,14 +47,6 @@ import { CenterDeckComponent } from './components/CenterDeck/center-deck.compone
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-
-  currentPlayerGameBoard: Signal<{
-    playerName: string;
-    cardGrid: CardGridView;
-  } | null> = computed(() => {
-    const gameBoard = this.gameBoardService.gameBoard();
-    return gameBoard.players[this.userService.userId()];
-  });
   otherPlayerBoards: Signal<
     {
       playerId: string;
@@ -74,7 +66,6 @@ export class AppComponent {
       });
   });
 
-
   constructor(
     public userService: UserService,
     public gameBoardService: GameBoardService,
@@ -91,17 +82,6 @@ export class AppComponent {
       room: this.roomService.ROOM_NAME,
       playerId: this.userService.userId(),
     });
-  }
-
-  revealCard(cardPosition: CardPosition) {
-    const payload: RevealCardPayload = {
-      action: ClientSocketAction.RevealCard,
-      room: this.roomService.ROOM_NAME,
-      playerId: this.userService.userId(),
-      cardPosition,
-    };
-
-    this.userService.websocketSubject.next(payload);
   }
 
   revealAllCards() {
@@ -151,7 +131,9 @@ export class AppComponent {
           this.gameBoardService.setLastRound(true);
           this.cdr.detectChanges();
         } else if (message.action === ServerSocketAction.GameEnded) {
-          this.gameBoardService.setWinnerName((message as GameEndedPayload).playerName);
+          this.gameBoardService.setWinnerName(
+            (message as GameEndedPayload).playerName
+          );
           this.gameBoardService.setWinnerId(message.playerId);
           this.gameBoardService.setGameOver(true);
           this.cdr.detectChanges();

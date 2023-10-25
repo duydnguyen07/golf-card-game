@@ -22,14 +22,10 @@
 </div>
 
 <div class="game-board">
-  <golf-card-game-my-game-board
-    [isDisabled]="!userService.isMyTurn() || gameBoardService.isLastRound()"
-    [currentPlayer]="currentPlayerGameBoard()"
-    (revealCard)="revealCard($event)"
-  ></golf-card-game-my-game-board>
+  <golf-card-game-my-game-board></golf-card-game-my-game-board>
   <br />
 
-  <div *ngIf="userService.isMyTurn() && gameBoardService.isLastRound()">
+  <div *ngIf="gameBoardService.isMyTurn() && gameBoardService.isLastRound()">
     <button (click)="revealAllCards()">Reveal All Cards</button>
   </div>
 </div>

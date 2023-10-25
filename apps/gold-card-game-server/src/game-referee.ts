@@ -3,6 +3,7 @@ import {
   ClientSocketAction,
   SocketPayload,
   RevealCardPayload,
+  SwapCardPayload,
 } from '@golf-card-game/interfaces';
 import { WebSocket } from 'ws';
 import { drawCardAndUpdatePlayersAndRoom, handleStartGame } from './game-start-handler';
@@ -63,6 +64,18 @@ function handleGameRuntime(socket: WebSocket, roomDatabase: Rooms) {
           roomName,
           roomDatabase,
         })
+      } else if(
+        action === ClientSocketAction.SwapCard
+      ) {
+        //TODO: perform swap card and then notify about the new drawn card 
+        
+        // TODO: if this is the last round, trigger reveal all card action, otherwise trigger new reveal card
+        handleRevealCard({
+          roomDatabase,
+          roomName,
+          playerId: parsedData.playerId,
+          cardPosition: (parsedData as SwapCardPayload).cardPosition,
+        });
       }
     } catch (e) {
       console.error(e);

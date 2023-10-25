@@ -1,0 +1,18 @@
+<div class="center-deck">
+  <h2>Drawn Card</h2>
+  <span>{{ gameBoardService.currentDrawnCard() }}</span>
+  <div>
+    <button [disabled]="!gameBoardService.isMyTurn() || gameBoardService.hasDrawnNewCard()" (click)="drawNewCard()">Draw from deck</button>
+    gameBoardService.hasDrawnNewCard() {{gameBoardService.hasDrawnNewCard()}}
+  
+  </div>
+
+  <div>
+    CurrentPlayer's turn:
+    {{ currentPlayerTurnName() }}
+  </div>
+
+  <div *ngIf="gameBoardService.isLastRound()">
+    LAST ROUND!!! CHOOSE CAREFULLY B****!!!
+  </div>
+</div>

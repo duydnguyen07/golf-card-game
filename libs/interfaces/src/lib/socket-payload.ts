@@ -41,6 +41,11 @@ export interface RevealCardPayload extends SocketPayload {
   cardPosition: CardPosition;
 }
 
+export interface SwapCardPayload extends SocketPayload {
+  action: ClientSocketAction.SwapCard;
+  cardPosition: CardPosition;
+}
+
 export interface SetRevealedCardPayload extends SocketPayload {
   action: ServerSocketAction.SetRevealedCard;
   revealedCard: CardInADeck;
@@ -67,6 +72,7 @@ export enum ClientSocketAction {
   Leave = 'leave',
   StartGame = 'start_game',
   RevealCard = 'reveal_card',
+  SwapCard = 'swap_card',
   RevealAllCards = 'reveal_all_cards',
   DrawNewCard = 'draw_new_card',
 }

@@ -12,7 +12,10 @@ import { CardInADeck } from '@golf-card-game/interfaces';
 })
 export class CardColumnComponent {
   @Input()
-  readonly!: boolean;
+  disableReveal!: boolean;
+
+  @Input()
+  disableSwap!: boolean;
 
   @Input()
   column!: {
@@ -22,6 +25,11 @@ export class CardColumnComponent {
 
   @Output()
   cardClicked = new EventEmitter<{
+    cardPositionIndex: number;
+  }>();
+
+  @Output()
+  swap = new EventEmitter<{
     cardPositionIndex: number;
   }>();
 }

@@ -1,4 +1,11 @@
-import { Injectable, signal } from '@angular/core';
+import {
+  Injectable,
+  Signal,
+  WritableSignal,
+  computed,
+  effect,
+  signal,
+} from '@angular/core';
 import {
   CardGridView,
   CardInADeck,
@@ -6,6 +13,7 @@ import {
   GameBoard,
 } from '@golf-card-game/interfaces';
 import { cloneDeep } from 'lodash';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +29,7 @@ export class GameBoardService {
   private _isGameOver = signal(false);
   private _winnerName = signal('');
   private _winnerId = signal('');
+  private _hasDrawnNewCard: WritableSignal<boolean | null> = signal(false);
 
   readonly gameBoard = this._gameBoard.asReadonly();
   readonly currentDrawnCard = this._currentDrawnCard.asReadonly();
@@ -29,8 +38,20 @@ export class GameBoardService {
   readonly isGameOver = this._isGameOver.asReadonly();
   readonly winnerId = this._winnerId.asReadonly();
   readonly winnerName = this._winnerName.asReadonly();
+  readonly hasDrawnNewCard = this._hasDrawnNewCard.asReadonly();
 
-  constructor() {}
+  readonly isMyTurn = computed(() => {
+    const currentPlayerTurnId = this.currentTurnPlayerId();
+    return this.isCurrentPlayerMe(currentPlayerTurnId);
+  });
+
+  constructor(private userService: UserService) {
+    effect(() => {});
+  }
+
+  setHasDrawnNewCard(value: boolean | null) {
+    this._hasDrawnNewCard.set(value);
+  }
 
   setWinnerId(value: string) {
     this._winnerId.set(value);
@@ -50,6 +71,12 @@ export class GameBoardService {
 
   setCurrentTurnPlayerId(id: string) {
     this._currentTurnPlayerId.set(id);
+
+    if (this.isCurrentPlayerMe(id)) {
+      this.setHasDrawnNewCard(false);
+    } else {
+      this.setHasDrawnNewCard(null);
+    }
   }
 
   setDrawnCard(card: CardInADeck) {
@@ -98,5 +125,9 @@ export class GameBoardService {
 
   reset() {
     this._gameBoard.set(this.GAMEBOARD);
+  }
+
+  private isCurrentPlayerMe(currentPlayerTurnId: string) {
+    return this.userService.userId() === currentPlayerTurnId;
   }
 }

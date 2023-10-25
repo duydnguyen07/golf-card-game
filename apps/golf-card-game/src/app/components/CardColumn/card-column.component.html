@@ -6,16 +6,29 @@
     <ng-container *ngIf="!item.isRevealed">
       <div [title]="item.name || ''">
         <button
-          [disabled]="readonly"
+          [disabled]="disableReveal"
           (click)="
             cardClicked.emit({
               cardPositionIndex: index
             })
           "
         >
-          Reveal Card
+          Reveal
         </button>
       </div>
     </ng-container>
+
+    <div>
+      <button
+        [disabled]="disableSwap"
+        (click)="
+          swap.emit({
+            cardPositionIndex: index
+          })
+        "
+      >
+        Swap
+      </button>
+    </div>
   </div>
 </div>

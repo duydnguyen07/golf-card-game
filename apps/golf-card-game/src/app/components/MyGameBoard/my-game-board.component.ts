@@ -4,12 +4,23 @@ import {
   EventEmitter,
   Input,
   Output,
+  Signal,
   SimpleChanges,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardGridView, CardPosition } from '@golf-card-game/interfaces';
+import {
+  CardGridView,
+  CardPosition,
+  ClientSocketAction,
+  RevealCardPayload,
+  SwapCardPayload,
+} from '@golf-card-game/interfaces';
 import { CardColumnComponent } from '../CardColumn/card-column.component';
 import { TotalPointsPipe } from '../../pipes/total-points.pipe';
+import { UserService } from '../../user.service';
+import { RoomService } from '../../room.service';
+import { GameBoardService } from '../../game-board.service';
 
 @Component({
   selector: 'golf-card-game-my-game-board',
@@ -20,24 +31,58 @@ import { TotalPointsPipe } from '../../pipes/total-points.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyGameBoardComponent {
-  @Input()
-  isDisabled!: boolean;
-
-  @Input()
-  currentPlayer!: {
+  currentPlayerGameBoard: Signal<{
     playerName: string;
     cardGrid: CardGridView;
-  } | null;
+  } | null> = computed(() => {
+    const gameBoard = this.gameBoardService.gameBoard();
+    return gameBoard.players[this.userService.userId()];
+  });
 
-  @Output()
-  revealCard = new EventEmitter<CardPosition>();
+  constructor(
+    public userService: UserService,
+    public gameBoardService: GameBoardService,
+    private roomService: RoomService
+  ) {}
 
-  notifyCardClicked(columnIndex: number, event: {
-    cardPositionIndex: number;
-  }) {
-    this.revealCard.emit({
+  revealCard(
+    columnIndex: number,
+    event: {
+      cardPositionIndex: number;
+    }
+  ) {
+    const cardPosition: CardPosition = {
       columnIndex,
-      cardPositionIndex: event.cardPositionIndex
-    })
+      cardPositionIndex: event.cardPositionIndex,
+    };
+    const payload: RevealCardPayload = {
+      action: ClientSocketAction.RevealCard,
+      room: this.roomService.ROOM_NAME,
+      playerId: this.userService.userId(),
+      cardPosition,
+    };
+
+    this.userService.websocketSubject.next(payload);
+  }
+
+  swapCard(
+    columnIndex: number,
+    event: {
+      cardPositionIndex: number;
+    }
+  ) {
+    const cardPosition: CardPosition = {
+      columnIndex,
+      cardPositionIndex: event.cardPositionIndex,
+    };
+
+    const payload: SwapCardPayload = {
+      action: ClientSocketAction.SwapCard,
+      room: this.roomService.ROOM_NAME,
+      playerId: this.userService.userId(),
+      cardPosition,
+    };
+
+    this.userService.websocketSubject.next(payload);
   }
 }

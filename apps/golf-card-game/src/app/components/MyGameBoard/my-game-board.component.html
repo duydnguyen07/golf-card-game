@@ -1,26 +1,34 @@
-<div *ngIf="currentPlayer">
-  <h3>My Hand</h3>
-  {{ currentPlayer.playerName }}
+<ng-container *ngIf="currentPlayerGameBoard() as currentPlayerGameBoard">
+  <div *ngIf="currentPlayerGameBoard">
+    <h3>My Hand</h3>
+    {{ currentPlayerGameBoard.playerName }}
+    <div
+      class="card-columns"
+      *ngIf="{
+      disableReveal: !gameBoardService.isMyTurn() || gameBoardService.isLastRound(),
+    } as data"
+    >
+      <golf-card-game-card-column
+        [disableReveal]="data.disableReveal"
+        [disableSwap]="!gameBoardService.isMyTurn()"
+        [column]="currentPlayerGameBoard.cardGrid.col1"
+        (cardClicked)="revealCard(0, $event)"
+        (swap)="swapCard(0, $event)"
+      ></golf-card-game-card-column>
+      <golf-card-game-card-column
+        [disableReveal]="data.disableReveal"
+        [disableSwap]="!gameBoardService.isMyTurn()"
+        [column]="currentPlayerGameBoard.cardGrid.col2"
+        (cardClicked)="revealCard(1, $event)"
+      ></golf-card-game-card-column>
+      <golf-card-game-card-column
+        [disableReveal]="data.disableReveal"
+        [disableSwap]="!gameBoardService.isMyTurn()"
+        [column]="currentPlayerGameBoard.cardGrid.col3"
+        (cardClicked)="revealCard(2, $event)"
+      ></golf-card-game-card-column>
+    </div>
 
-  <div class="card-columns">
-    <golf-card-game-card-column
-      [readonly]="isDisabled"
-      [column]="currentPlayer.cardGrid.col1"
-      (cardClicked)="notifyCardClicked(0, $event)"
-    ></golf-card-game-card-column>
-    <golf-card-game-card-column
-      [readonly]="isDisabled"
-      [column]="currentPlayer.cardGrid.col2"
-      (cardClicked)="notifyCardClicked(1, $event)"
-    ></golf-card-game-card-column>
-    <golf-card-game-card-column
-      [readonly]="isDisabled"
-      [column]="currentPlayer.cardGrid.col3"
-      (cardClicked)="notifyCardClicked(2, $event)"
-    ></golf-card-game-card-column>
+    <div>Total Points: {{ currentPlayerGameBoard.cardGrid | totalPoints }}</div>
   </div>
-
-  <div>
-    Total Points: {{currentPlayer.cardGrid | totalPoints}}
-  </div>
-</div>
+</ng-container>
