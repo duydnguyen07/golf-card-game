@@ -103,10 +103,22 @@ function deal9Cards(
       cardIndexSet,
       fullDeck,
     }),
-    leftOver: fullDeck.filter((_, index) => !cardIndexSet.has(index)),
+    leftOver: shuffleDeck(fullDeck.filter((_, index) => !cardIndexSet.has(index))),
   };
 
   return result;
+}
+
+function shuffleDeck(cards: CardInADeck[]) {
+  const clonedDeck = [...cards]
+  for (let originalIndex = clonedDeck.length - 1; originalIndex > 0; originalIndex--) {
+    let newIndex = Math.floor(Math.random() * originalIndex);
+    let temp = clonedDeck[originalIndex];
+    clonedDeck[originalIndex] = clonedDeck[newIndex];
+    clonedDeck[newIndex] = temp;
+  }
+
+  return clonedDeck;
 }
 
 function dealCardToEachPlayer(inputs: {

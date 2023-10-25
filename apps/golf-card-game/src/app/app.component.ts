@@ -29,6 +29,7 @@ import { CommonModule } from '@angular/common';
 import { GameBoardService } from './game-board.service';
 import { MyGameBoardComponent } from './components/MyGameBoard/my-game-board.component';
 import { OthersGameBoardComponent } from './components/OthersGameBoard/others-game-board.component';
+import { CenterDeckComponent } from './components/CenterDeck/center-deck.component';
 
 @Component({
   standalone: true,
@@ -38,6 +39,7 @@ import { OthersGameBoardComponent } from './components/OthersGameBoard/others-ga
     HttpClientModule,
     CommonModule,
     MyGameBoardComponent,
+    CenterDeckComponent
   ],
   selector: 'golf-card-game-root',
   templateUrl: './app.component.html',
@@ -45,7 +47,6 @@ import { OthersGameBoardComponent } from './components/OthersGameBoard/others-ga
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  ROOM_NAME = '123'; //TODO: make this room name unique
 
   currentPlayerGameBoard: Signal<{
     playerName: string;
@@ -73,19 +74,6 @@ export class AppComponent {
       });
   });
 
-  currentPlayerTurnName = computed(() => {
-    const currentPlayerTurnId = this.gameBoardService.currentTurnPlayerId();
-    if (this.userService.userId() === currentPlayerTurnId) {
-      return this.userService.PLAYER_NAME;
-    } else {
-      return this.roomService.getPlayerName(currentPlayerTurnId);
-    }
-  });
-
-  isMyTurn = computed(() => {
-    const currentPlayerTurnId = this.gameBoardService.currentTurnPlayerId();
-    return this.userService.userId() === currentPlayerTurnId;
-  });
 
   constructor(
     public userService: UserService,
@@ -100,7 +88,7 @@ export class AppComponent {
     this.gameBoardService.reset();
     this.userService.websocketSubject.next({
       action: ClientSocketAction.StartGame,
-      room: this.ROOM_NAME,
+      room: this.roomService.ROOM_NAME,
       playerId: this.userService.userId(),
     });
   }
@@ -108,7 +96,7 @@ export class AppComponent {
   revealCard(cardPosition: CardPosition) {
     const payload: RevealCardPayload = {
       action: ClientSocketAction.RevealCard,
-      room: this.ROOM_NAME,
+      room: this.roomService.ROOM_NAME,
       playerId: this.userService.userId(),
       cardPosition,
     };
@@ -119,7 +107,7 @@ export class AppComponent {
   revealAllCards() {
     const payload: SocketPayload = {
       action: ClientSocketAction.RevealAllCards,
-      room: this.ROOM_NAME,
+      room: this.roomService.ROOM_NAME,
       playerId: this.userService.userId(),
     };
 
@@ -181,7 +169,7 @@ export class AppComponent {
       playerName: this.userService.PLAYER_NAME,
       playerId: '',
       action: ClientSocketAction.Join,
-      room: this.ROOM_NAME,
+      room: this.roomService.ROOM_NAME,
     };
     subject.next(socketPayload);
   }

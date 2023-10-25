@@ -5,7 +5,7 @@ import {
   RevealCardPayload,
 } from '@golf-card-game/interfaces';
 import { WebSocket } from 'ws';
-import { handleStartGame } from './game-start-handler';
+import { drawCardAndUpdatePlayersAndRoom, handleStartGame } from './game-start-handler';
 import { handleRevealCard } from './reveal-card-handler';
 import { handleGameEnd, isGameOver } from './end-game-handler';
 import { getNextPlayerIdAndUpdatePlayersAndRoom } from './next-player-handler';
@@ -53,6 +53,16 @@ function handleGameRuntime(socket: WebSocket, roomDatabase: Rooms) {
             roomDatabase,
           });
         }
+      } else if (
+        action === ClientSocketAction.DrawNewCard
+      ) {
+        const currentRoom = roomDatabase[roomName]
+
+        drawCardAndUpdatePlayersAndRoom({
+          leftOverCards: currentRoom.leftOverCards,
+          roomName,
+          roomDatabase,
+        })
       }
     } catch (e) {
       console.error(e);

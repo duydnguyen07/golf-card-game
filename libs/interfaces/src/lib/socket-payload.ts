@@ -67,7 +67,8 @@ export enum ClientSocketAction {
   Leave = 'leave',
   StartGame = 'start_game',
   RevealCard = 'reveal_card',
-  RevealAllCards = 'reveal_all_cards'
+  RevealAllCards = 'reveal_all_cards',
+  DrawNewCard = 'draw_new_card',
 }
 
 export enum ServerSocketAction {

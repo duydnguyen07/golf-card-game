@@ -5,9 +5,8 @@ import {
   Rooms,
   ServerSocketAction,
   SetDrawnCardPayload,
-  SetPlayerTurnPayload,
 } from '@golf-card-game/interfaces';
-import { drawACard, getNextPlayerId } from './game-logic-engine';
+import { drawACard } from './game-logic-engine';
 import { broadcastMessageToAllPlayersInRoom } from './socket-util';
 import { deal9Cards, notifyAllPlayersAboutDealtCards } from './card-dealer';
 
@@ -31,7 +30,6 @@ function handleStartGame(roomDatabase: Rooms, roomName: string) {
   notifyAllPlayersAboutDealtCards(playersInRoom, roomName, currentRoom);
 
   drawCardAndUpdatePlayersAndRoom({
-    currentRoom,
     leftOverCards: dealtCardsAndDeck.leftOver,
     roomName,
     roomDatabase,
@@ -40,17 +38,18 @@ function handleStartGame(roomDatabase: Rooms, roomName: string) {
 
 
 function drawCardAndUpdatePlayersAndRoom({
-  currentRoom,
   leftOverCards,
   roomName,
   roomDatabase,
 }: {
-  currentRoom: Room;
   leftOverCards: CardInADeck[];
   roomName: string;
   roomDatabase: Rooms;
 }) {
-  const nextCardRecord = drawACard(leftOverCards);
+  const currentRoom = roomDatabase[roomName];
+  const drawnCard = currentRoom.drawnCard;
+  const nextCardRecord = drawACard(leftOverCards, drawnCard);
+
   currentRoom.drawnCard = nextCardRecord.drawnCard;
   currentRoom.leftOverCards = nextCardRecord.leftOverCards;
 
@@ -68,4 +67,4 @@ function drawCardAndUpdatePlayersAndRoom({
   );
 }
 
-export { handleStartGame };
+export { handleStartGame, drawCardAndUpdatePlayersAndRoom };

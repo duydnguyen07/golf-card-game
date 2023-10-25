@@ -6,10 +6,9 @@
 
 <button (click)="deal()">Deal</button>
 
-
 <div *ngIf="gameBoardService.isGameOver()">
   <h1>GAME OVER!</h1>
-  The winner is {{gameBoardService.winnerName()}}
+  The winner is {{ gameBoardService.winnerName() }}
 </div>
 
 <div>
@@ -18,35 +17,19 @@
   ></golf-card-game-others-game-board>
 </div>
 
-<div class="center-deck">
-  <h2>Drawn Card</h2>
-  <button [disabled]="!isMyTurn()">Pick card</button>
-  <span>{{ gameBoardService.currentDrawnCard() }}</span>
-  <div>
-    <button [disabled]="!isMyTurn()">Draw from deck</button>
-  </div>
-
-  <div>
-    CurrentPlayer's turn:
-    {{ currentPlayerTurnName() }}
-  </div>
-
-  <div *ngIf="gameBoardService.isLastRound()">
-    LAST ROUND!!! CHOOSE CAREFULLY B****!!!
-  </div>
+<div>
+  <golf-card-game-center-deck></golf-card-game-center-deck>
 </div>
 
 <div class="game-board">
   <golf-card-game-my-game-board
-    [isDisabled]="!isMyTurn() || gameBoardService.isLastRound()"
+    [isDisabled]="!userService.isMyTurn() || gameBoardService.isLastRound()"
     [currentPlayer]="currentPlayerGameBoard()"
     (revealCard)="revealCard($event)"
   ></golf-card-game-my-game-board>
-  <br/>
+  <br />
 
-  <div *ngIf="isMyTurn() && gameBoardService.isLastRound()">
+  <div *ngIf="userService.isMyTurn() && gameBoardService.isLastRound()">
     <button (click)="revealAllCards()">Reveal All Cards</button>
   </div>
 </div>
-
-

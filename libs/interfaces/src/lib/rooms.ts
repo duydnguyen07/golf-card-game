@@ -9,7 +9,7 @@ export type Room = {
     [socketUuid in string]: PlayerProfile;
   };
   leftOverCards: CardInADeck[];
-  drawnCard: CardInADeck;
+  drawnCard: CardInADeck | null;
   status: RoomStatus;
   currentTurnPlayerId: string;
   lastRoundTriggeredByPlayerId: string | null;
