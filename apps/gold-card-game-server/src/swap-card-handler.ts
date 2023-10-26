@@ -1,4 +1,5 @@
-import { CardInADeck, CardPosition, Rooms } from '@golf-card-game/interfaces';
+import { CardInADeck, CardPosition, Rooms, ServerSocketAction, SetDrawnCardPayload } from '@golf-card-game/interfaces';
+import { broadcastMessageToAllPlayersInRoom } from './socket-util';
 
 function handleSwapCard({
   roomDatabase,
@@ -33,7 +34,20 @@ function handleSwapCard({
       name: currentRoom.drawnCard,
     };
 
-    //TODO: remove set currentPlayerCard to drawn card
+    currentRoom.drawnCard = currentPlayerCard;
+    
+    const setDrawnCardPayload: SetDrawnCardPayload = {
+      action: ServerSocketAction.SetDrawnCard,
+      room: roomName,
+      playerId: '',
+      drawnCard: currentRoom.drawnCard,
+    };
+  
+    broadcastMessageToAllPlayersInRoom(
+      roomDatabase,
+      roomName,
+      JSON.stringify(setDrawnCardPayload)
+    );
   } else {
     console.error(
       'Cannot determine card grid profile at column index',

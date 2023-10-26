@@ -11,6 +11,7 @@ import { handleRevealCard } from './reveal-card-handler';
 import { handleGameEnd, isGameOver } from './end-game-handler';
 import { getNextPlayerIdAndUpdatePlayersAndRoom } from './next-player-handler';
 import { revealAllCards } from './reveal-all-cards-handler';
+import { handleSwapCard } from './swap-card-handler';
 
 // This function is the main place where room is modified
 function handleGameRuntime(socket: WebSocket, roomDatabase: Rooms) {
@@ -67,15 +68,37 @@ function handleGameRuntime(socket: WebSocket, roomDatabase: Rooms) {
       } else if(
         action === ClientSocketAction.SwapCard
       ) {
-        //TODO: perform swap card and then notify about the new drawn card 
-        
-        // TODO: if this is the last round, trigger reveal all card action, otherwise trigger new reveal card
+        handleSwapCard({
+          roomDatabase,
+          roomName,
+          playerId: parsedData.playerId,
+          cardPosition: (parsedData as SwapCardPayload).cardPosition,
+        });
+
         handleRevealCard({
           roomDatabase,
           roomName,
           playerId: parsedData.playerId,
           cardPosition: (parsedData as SwapCardPayload).cardPosition,
         });
+
+        const isLastRound = roomDatabase[roomName].lastRoundTriggeredByPlayerId;
+
+        if(isLastRound) {
+          revealAllCards(roomName, roomDatabase, parsedData.playerId);
+        } 
+
+        if (isGameOver(roomDatabase[roomName])) {
+          handleGameEnd({
+            roomDatabase,
+            roomName,
+          });
+        } else {
+          getNextPlayerIdAndUpdatePlayersAndRoom({
+            roomName,
+            roomDatabase,
+          });
+        }
       }
     } catch (e) {
       console.error(e);

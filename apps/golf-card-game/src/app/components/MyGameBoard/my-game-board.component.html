@@ -5,7 +5,7 @@
     <div
       class="card-columns"
       *ngIf="{
-      disableReveal: !gameBoardService.isMyTurn() || gameBoardService.isLastRound(),
+      disableReveal: !gameBoardService.isMyTurn() || gameBoardService.isLastRound() || gameBoardService.hasDrawnNewCard() === true,
     } as data"
     >
       <golf-card-game-card-column
@@ -20,12 +20,14 @@
         [disableSwap]="!gameBoardService.isMyTurn()"
         [column]="currentPlayerGameBoard.cardGrid.col2"
         (cardClicked)="revealCard(1, $event)"
+        (swap)="swapCard(1, $event)"
       ></golf-card-game-card-column>
       <golf-card-game-card-column
         [disableReveal]="data.disableReveal"
         [disableSwap]="!gameBoardService.isMyTurn()"
         [column]="currentPlayerGameBoard.cardGrid.col3"
         (cardClicked)="revealCard(2, $event)"
+        (swap)="swapCard(2, $event)"
       ></golf-card-game-card-column>
     </div>
 

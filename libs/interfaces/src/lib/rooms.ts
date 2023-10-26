@@ -10,10 +10,9 @@ export type Room = {
   };
   leftOverCards: CardInADeck[];
   drawnCard: CardInADeck | null;
-  status: RoomStatus;
   currentTurnPlayerId: string;
   lastRoundTriggeredByPlayerId: string | null;
-  isGameOver: boolean;
+  status: RoomStatus;
 }
 
 export type Rooms = {

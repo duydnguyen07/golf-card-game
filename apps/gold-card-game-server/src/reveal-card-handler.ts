@@ -44,6 +44,7 @@ function handleRevealCard({
     );
 
     const hasRevealedAll = hasThisPlayerRevealAllCards(playerProfile);
+
     if (hasRevealedAll && !room.lastRoundTriggeredByPlayerId) {
       room.lastRoundTriggeredByPlayerId = playerId;
 

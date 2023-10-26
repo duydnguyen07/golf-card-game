@@ -31,6 +31,8 @@ function handleGameEnd({
     roomName,
     JSON.stringify(payload)
   );
+
+  resetRoom(room);
 }
 
 function calculateFinalScore(room: Room): {
@@ -65,5 +67,12 @@ function isGameOver(room: Room) {
 
   return isGameOver;
 }
+
+function resetRoom(room: Room) {
+  room.leftOverCards = [];
+  room.drawnCard = null;
+  room.currentTurnPlayerId = '';
+  room.lastRoundTriggeredByPlayerId = null;
+} 
 
 export { handleGameEnd, isGameOver };
