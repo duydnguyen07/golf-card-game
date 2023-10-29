@@ -4,7 +4,9 @@
   "license": "MIT",
   "scripts": {
     "start": "nx run golf-card-game:serve:development",
-    "start:backend": "nx serve golf-card-game-server"
+    "start:backend": "nx serve golf-card-game-server",
+    "build:backend": "nx build golf-card-game-server",
+    "build:frontend": "nx build golf-card-game --configuration=production"
   },
   "private": true,
   "dependencies": {
@@ -19,11 +21,13 @@
     "@nx/angular": "16.9.1",
     "@types/express-ws": "^3.0.2",
     "axios": "^1.0.0",
+    "bufferutil": "^4.0.8",
     "express": "^4.18.1",
     "express-ws": "^5.0.2",
     "lodash": "^4.17.21",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "utf-8-validate": "^5.0.10",
     "uuid": "^9.0.1",
     "zone.js": "~0.13.0"
   },

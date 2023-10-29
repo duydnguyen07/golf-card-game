@@ -16,7 +16,8 @@
         "tsConfig": "apps/gold-card-game-server/tsconfig.app.json",
         "assets": ["apps/gold-card-game-server/src/assets"],
         "isolatedConfig": true,
-        "webpackConfig": "apps/gold-card-game-server/webpack.config.js"
+        "webpackConfig": "apps/gold-card-game-server/webpack.config.js",
+        "externalDependencies": "none"
       },
       "configurations": {
         "development": {},

@@ -48,6 +48,12 @@ Have a look at the [Nx Console extensions](https://nx.dev/nx-console). It provid
 
 Just run `nx build demoapp` to build the application. The build artifacts will be stored in the `dist/` directory, ready to be deployed.
 
+## Deployment
+Run `npm run build:frontend` and `npm run build:backend`
+Copy content of `dist/apps/golf-card-game` into `dist/apps/gold-card-game-server/assets`
+Deploy artifact to server `rsync -a dist/apps/gold-card-game-server/* sandstorm:/home/duy/golf-card-game-artifacts`
+Go to sandstorm and run `authbind --deep pm2 restart main.js`
+
 ## Set up CI!
 
 Nx comes with local caching already built-in (check your `nx.json`). On CI you might want to go a step further.

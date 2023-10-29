@@ -15,13 +15,14 @@ var expressWsInstance = expressWs(app, null, {
       maxPayload: 500000
     }
 });
-
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
-
 expressWsInstance.app.ws('/ws', function (ws, req) {
   handleRoomSetup(ws)
   handleGameRuntime(ws, ROOM_DATABASE)
 });
+
+app.use(express.static(path.join(__dirname, 'assets')));
+app.get('/*', (req, res) => res.sendFile(path.join(__dirname)));
+
 
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
